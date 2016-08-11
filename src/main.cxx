@@ -2,7 +2,10 @@
 #include <vector>
 #include <iostream>
 
-#include "utils/configuration.h"
+#include "utils/runinstance.h"
+#include "image/imagehandler.h"
+#include "image/itkimagehandler.h"
+#include "image/opcvimagehandler.h"
 
 int main(int argc, char** argv) {
   if (argc < 1) {
@@ -11,23 +14,10 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  tps::Configuration configuration(argv[1]);
+  tps::ImageHandler *imageHandler = new tps::OPCVImageHandler();
 
-  configuration.printConfigs();
-  std::cout << configuration.getString("referenceImage") << std::endl;
-  std::cout << configuration.getString("targetImage") << std::endl;
-  std::cout << configuration.getDouble("percentage") << std::endl;
-
-  std::vector<std::vector<double>> keypoints = configuration.getDoubleVector("keypoints");
-
-  for (int x = 0; x < keypoints.size(); x++) {
-        for (int y = 0; y < keypoints[x].size(); y++)
-            std::cout << keypoints[x][y] << " ";
-      std::cout << std::endl;
-  }
-
-  //
-  // boundaries
+  tps::RunInstance runInstace(argv[1], imageHandler);
+  runInstace.loadData();
 
   return 0;
 }
