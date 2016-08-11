@@ -22,6 +22,7 @@ tps::Image tps::OPCVImageHandler::loadImageData(std::string filename) {
 }
 
 void tps::OPCVImageHandler::saveImageData(tps::Image resultImage, std::string filename) {
+  filename = filename + ".png";
   std::vector<int> compression_params;
   compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
   compression_params.push_back(95);

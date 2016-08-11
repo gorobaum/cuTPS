@@ -10,15 +10,15 @@ typedef itk::ImageFileWriter<ImageType> WriterType;
 
 itk::ImageIOBase::Pointer tps::ITKImageHandler::getImageIO(std::string input) {
   itk::ImageIOBase::Pointer imageIO = itk::ImageIOFactory::CreateImageIO(input.c_str(), itk::ImageIOFactory::ReadMode);
- 
+
   imageIO->SetFileName(input);
   imageIO->ReadImageInformation();
 
   return imageIO;
 }
 
-tps::Image tps::ITKImageHandler::loadImageData(std::string filename) { 
- 
+tps::Image tps::ITKImageHandler::loadImageData(std::string filename) {
+
   std::vector<int> dimensions;
   itk::ImageIOBase::Pointer imageIO = getImageIO(filename);
 
@@ -59,7 +59,7 @@ tps::Image tps::ITKImageHandler::loadImageData(std::string filename) {
 void tps::ITKImageHandler::saveImageData(tps::Image resultImage, std::string filename) {
   ImageType::Pointer image = ImageType::New();
   std::vector<int> dimensions = resultImage.getDimensions();
-
+  filename = filename + ".nii.gz";
 
   ImageType::RegionType region;
   ImageType::IndexType start;
@@ -75,7 +75,7 @@ void tps::ITKImageHandler::saveImageData(tps::Image resultImage, std::string fil
 
   image->SetRegions(region);
   image->Allocate();
- 
+
   itk::ImageRegionIterator<ImageType> imageIterator(image,region);
 
   while(!imageIterator.IsAtEnd()){

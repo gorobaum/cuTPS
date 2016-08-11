@@ -17,13 +17,14 @@ public:
 
     void printConfigs();
     void readConfigurations();
-    double getDouble(std::string configurationName);
+    bool isCallFeatureGenerator();
+    float getFloat(std::string configurationName);
     std::string getString(std::string configurationName);
-    std::vector<std::vector<double>> getDoubleVector(std::string configurationName);
+    std::vector<std::vector<float>> getFloatVector(std::string configurationName);
 
 private:
     void setUpDefaultConf();
-    std::vector<double> getDoubleVectorFromString(std::string vectorString);
+    std::vector<float> getFloatVectorFromString(std::string vectorString);
     std::map<std::string,std::string>::iterator findInConfiguration(std::string configurationName);
 
     std::string configurationFilePath_;

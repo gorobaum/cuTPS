@@ -6,6 +6,7 @@
 #include "image/image.h"
 #include "configuration.h"
 #include "image/imagehandler.h"
+#include "feature/featuregenerator.h"
 
 namespace tps {
 
@@ -21,12 +22,17 @@ public:
 
 private:
     void loadKeypoints();
+    void generateKeypoints();
+    void generateKeypointImage();
     Image loadImageData(std::string configString);
+
+    ImageHandler* imageHandler_;
+    Configuration configuration_;
 
     Image targetImage_;
     Image referenceImage_;
-    ImageHandler* imageHandler_;
-    Configuration configuration_;
+    std::vector< std::vector<float> > targetKeypoints_;
+    std::vector< std::vector<float> > referenceKeypoints_;
 };
 
 } //namespace

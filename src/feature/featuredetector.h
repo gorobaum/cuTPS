@@ -12,15 +12,16 @@ public:
 	FeatureDetector(Image referenceImage, Image targetImage):
 		referenceImage_(referenceImage),
 		targetImage_(targetImage) {};
-  virtual void run() = 0;
-  std::vector< std::vector<float> > getReferenceKeypoints() {return referenceKeypoints;};
-  std::vector< std::vector<float> > getTargetKeypoints() {return targetKeypoints;};
+    virtual void run() = 0;
+    std::vector< std::vector<float> > getTargetKeypoints() {return targetKeypoints;};
+    std::vector< std::vector<float> > getReferenceKeypoints() {return referenceKeypoints;};
+    
 protected:
+    Image targetImage_;
 	Image referenceImage_;
-	Image targetImage_;
 	// Data structures
+    std::vector< std::vector<float> > targetKeypoints;
 	std::vector< std::vector<float> > referenceKeypoints;
-  std::vector< std::vector<float> > targetKeypoints;
 };
 
 } // namespace
