@@ -16,10 +16,10 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xptxas -v -arch=sm_30 -Xcompiler -std=c
 cuda_add_executable(tps
   src/main.cxx
 
-  src/image/image.cxx
-  src/image/itkimagehandler.cxx
-  src/image/opcvimagehandler.cxx
-  src/image/imagedeformation.cxx
+  src/image/image.cpp
+  src/image/itkimagehandler.cpp
+  src/image/opcvimagehandler.cpp
+  src/image/imagedeformation.cpp
 
   src/utils/controller.cpp
   src/utils/runinstance.cpp
