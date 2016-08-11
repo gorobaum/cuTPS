@@ -11,7 +11,9 @@ namespace tps {
 
 class RunInstance {
 public:
-    RunInstance(std::string configurationFilePath, ImageHandler* imageHandler) :
+    RunInstance(std::string configurationFilePath, Image referenceImage,
+                ImageHandler* imageHandler) :
+        referenceImage_(referenceImage),
         imageHandler_(imageHandler),
         configuration_(configurationFilePath) {}
 

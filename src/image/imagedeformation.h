@@ -1,5 +1,5 @@
-#ifndef TPS_IMAGEDEFORMATION_H_
-#define TPS_IMAGEDEFORMATION_H_
+#ifndef TPS_IMAGE_IMAGEDEFORMATION_H_
+#define TPS_IMAGE_IMAGEDEFORMATION_H_
 
 #include <vector>
 #include <string>
@@ -7,7 +7,7 @@
 #include "image.h"
 
 namespace tps {
-  
+
 class ImageDeformation {
 public:
   ImageDeformation(tps::Image image) :

@@ -1,5 +1,5 @@
-#ifndef _TPS_ITKIMAGEHANDLER_H_
-#define _TPS_ITKIMAGEHANDLER_H_
+#ifndef TPS_IMAGE_ITKIMAGEHANDLER_H_
+#define TPS_IMAGE_ITKIMAGEHANDLER_H_
 
 #include <itkImage.h>
 #include <itkImageIOBase.h>

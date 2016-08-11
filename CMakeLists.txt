@@ -21,8 +21,9 @@ cuda_add_executable(tps
   src/image/opcvimagehandler.cxx
   src/image/imagedeformation.cxx
 
-  src/utils/configuration.cpp
+  src/utils/controller.cpp
   src/utils/runinstance.cpp
+  src/utils/configuration.cpp
   )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -fpermissive -include cstddef")

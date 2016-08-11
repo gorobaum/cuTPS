@@ -1,5 +1,5 @@
-#ifndef _TPS_OPCVIMAGEHANDLER_H_
-#define _TPS_OPCVIMAGEHANDLER_H_
+#ifndef TPS_IMAGE_OPCVIMAGEHANDLER_H_
+#define TPS_IMAGE_OPCVIMAGEHANDLER_H_
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>

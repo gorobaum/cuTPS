@@ -6,10 +6,8 @@ namespace tps {
 
 void RunInstance::loadData() {
     targetImage_ = loadImageData("targetImage");
-    referenceImage_ = loadImageData("referenceImage");
 
     configuration_.printConfigs();
-    std::cout << configuration_.getString("referenceImage") << std::endl;
     std::cout << configuration_.getString("targetImage") << std::endl;
     std::cout << configuration_.getDouble("percentage") << std::endl;
 

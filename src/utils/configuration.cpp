@@ -7,7 +7,6 @@
 namespace tps {
 
 void Configuration::setUpDefaultConf() {
-    defaultConfiguration_["referenceImage"] = "/home/goroba/reps/tps-c/images/grid-Ref.png";
     defaultConfiguration_["targetImage"] = "/home/goroba/reps/tps-c/images/grid-Tar.png";
     defaultConfiguration_["percentage"] = "2";
     defaultConfiguration_["keypoints"] = "2619, 1927; 2457, 2162; 2292, 2344; 2799, 1682; 2942, 1489; 3097, 1267; 3242, 1067; 2209, 1659; 2372, 1719; 2882, 2102; 3074, 2214; 2314, 1429; 3207, 1867";
@@ -62,7 +61,7 @@ std::vector<std::vector<double>> Configuration::getDoubleVector(std::string conf
         std::vector<double> auxVector = getDoubleVectorFromString(item);
         result.push_back(auxVector);
     }
-    
+
     return result;
 }
 

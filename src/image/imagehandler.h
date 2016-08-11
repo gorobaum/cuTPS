@@ -1,5 +1,5 @@
-#ifndef _TPS_IMAGEHANDLER_H_
-#define _TPS_IMAGEHANDLER_H_
+#ifndef TPS_IMAGE_IMAGEHANDLER_H_
+#define TPS_IMAGE_IMAGEHANDLER_H_
 
 #include <string>
 

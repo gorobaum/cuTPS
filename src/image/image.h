@@ -1,5 +1,5 @@
-#ifndef TPS_IMAGE_H_
-#define TPS_IMAGE_H_
+#ifndef TPS_IMAGE_IMAGE_H_
+#define TPS_IMAGE_IMAGE_H_
 
 #include <vector>
 #include <string>
