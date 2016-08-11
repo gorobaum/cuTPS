@@ -16,6 +16,8 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xptxas -v -arch=sm_30 -Xcompiler -std=c
 cuda_add_executable(tps
   src/main.cxx
 
+  src/feature/featuregenerator.cpp
+
   src/image/image.cpp
   src/image/itkimagehandler.cpp
   src/image/opcvimagehandler.cpp
