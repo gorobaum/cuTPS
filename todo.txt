@@ -1,0 +1,18 @@
+- Profiling do código
+- Verificar o gasto médio de memória do cuSolver
+- Verificar a saida do NVVP sem o cuSolver
+
+Otimização:
+- Manter o número de threads por bloco em um múltiplo de 32 - OK
+- Não utilizar unsigned em loops - OK
+- Utilizar shared memory - Ok, O tempo de alocação da memória praticamente dobra o tempo de execução do kernel
+- Salvar as imagens como textura
+- Garantir o acesso agrupado a memória
+- Calcular a ocupação dos recursos da GPU
+- Balancear o número de threads com os recursos da GPU
+- Verificar a diferença de eficiência e eficacia entre double e float
+- Paralelizar a execução do código entre GPU e CPU utilizando cuda streams
+- Paralelizar a execução dos kerneis
+- Utilizar flags para diminuir a precisão e aumentar o desempenho da GPU ( Ex: -use_fast_math )
+- Trabalhar com precisão simples
+- Transferir todos os dados juntos em um grande bloco
