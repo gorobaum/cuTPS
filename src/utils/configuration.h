@@ -11,7 +11,6 @@ class Configuration {
 public:
   Configuration(std::string configurationFilePath):
     configurationFilePath_(configurationFilePath) {
-        setUpDefaultConf();
         readConfigurations();
     };
 
@@ -23,13 +22,11 @@ public:
     std::vector<std::vector<float>> getFloatVector(std::string configurationName);
 
 private:
-    void setUpDefaultConf();
     std::vector<float> getFloatVectorFromString(std::string vectorString);
     std::map<std::string,std::string>::iterator findInConfiguration(std::string configurationName);
 
     std::string configurationFilePath_;
     std::map<std::string, std::string> currentConfiguration_;
-    std::map<std::string, std::string> defaultConfiguration_;
 };
 
 } //namespace

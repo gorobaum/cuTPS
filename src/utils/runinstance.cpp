@@ -7,8 +7,6 @@ namespace tps {
 void RunInstance::loadData() {
     targetImage_ = loadImageData("targetImage");
     loadKeypoints();
-
-    configuration_.printConfigs();
 }
 
 void RunInstance::loadKeypoints() {

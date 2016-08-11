@@ -6,13 +6,6 @@
 
 namespace tps {
 
-void Configuration::setUpDefaultConf() {
-    defaultConfiguration_["targetImage"] = "/home/goroba/reps/tps-c/images/grid-Tar.png";
-    defaultConfiguration_["percentage"] = "0.02";
-    defaultConfiguration_["keypoints"] = "2619, 1927; 2457, 2162; 2292, 2344; 2799, 1682; 2942, 1489; 3097, 1267; 3242, 1067; 2209, 1659; 2372, 1719; 2882, 2102; 3074, 2214; 2314, 1429; 3207, 1867";
-    defaultConfiguration_["boundaries"] = "1, 512; 1, 512; 1, 1;";
-}
-
 void Configuration::readConfigurations() {
     std::ifstream infile;
 
@@ -42,7 +35,9 @@ void Configuration::printConfigs() {
 std::map<std::string,std::string>::iterator Configuration::findInConfiguration(std::string configurationName) {
     std::map<std::string,std::string>::iterator pair = currentConfiguration_.find(configurationName);
     if (pair == currentConfiguration_.end()) {
-        pair = defaultConfiguration_.find(configurationName);
+        std::cout << "The configuration \'" << configurationName <<
+                     "\' was not found. Please check the configuration file over"
+                     << configurationFilePath_ << std::endl;
     }
     return pair;
 }
