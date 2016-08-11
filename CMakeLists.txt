@@ -14,7 +14,7 @@ include_directories(src "${ARMADILLO_INCLUDE_DIRS}")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xptxas -v -arch=sm_30 -Xcompiler -std=c++98")
 
 cuda_add_executable(tps
-  src/main.cxx
+  src/main.cpp
 
   src/feature/featuregenerator.cpp
 
