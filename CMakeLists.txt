@@ -23,6 +23,11 @@ cuda_add_executable(tps
   src/image/opcvimagehandler.cpp
   src/image/imagedeformation.cpp
 
+  src/linearsystem/cplinearsystems.cpp
+  src/linearsystem/cudalinearsystems.cpp
+  src/linearsystem/armalinearsystems.cpp
+
+  src/utils/cudamemory.cxx
   src/utils/controller.cpp
   src/utils/runinstance.cpp
   src/utils/configuration.cpp

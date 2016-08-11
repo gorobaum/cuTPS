@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "cudamemory.h"
 #include "image/image.h"
 #include "configuration.h"
 #include "image/imagehandler.h"
@@ -19,11 +20,22 @@ public:
         configuration_(configurationFilePath) {}
 
     void loadData();
+    void executeTps();
+    void solveLinearSystem();
+    void allocateGpuMemory();
 
 private:
     void loadKeypoints();
     void generateKeypoints();
     void generateKeypointImage();
+
+    void solveLinearSystemWithCuda();
+    void solveLinearSystemWithArmadillo();
+
+    void executeCudaTps();
+    void executeBasicTps();
+    void executeParallelTps();
+
     Image loadImageData(std::string configString);
 
     ImageHandler* imageHandler_;

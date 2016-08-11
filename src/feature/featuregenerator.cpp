@@ -15,9 +15,9 @@ void tps::FeatureGenerator::run() {
   xStep = dimensions[0]*1.0/(gridSizeX);
   yStep = dimensions[1]*1.0/(gridSizeY);
   zStep = dimensions[2]*1.0/(gridSizeZ);
-  std::cout << "xStep = " << xStep << std::endl;
-  std::cout << "yStep = " << yStep << std::endl;
-  std::cout << "zStep = " << zStep << std::endl;
+  // std::cout << "xStep = " << xStep << std::endl;
+  // std::cout << "yStep = " << yStep << std::endl;
+  // std::cout << "zStep = " << zStep << std::endl;
   createReferenceImageFeatures();
   createTargetImageFeatures();
 }

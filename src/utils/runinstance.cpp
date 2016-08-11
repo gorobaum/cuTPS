@@ -9,16 +9,6 @@ void RunInstance::loadData() {
     loadKeypoints();
 
     configuration_.printConfigs();
-    std::cout << configuration_.getString("targetImage") << std::endl;
-    std::cout << configuration_.getFloat("percentage") << std::endl;
-
-    std::vector<std::vector<float>> keypoints = configuration_.getFloatVector("keypoints");
-
-    for (int x = 0; x < keypoints.size(); x++) {
-          for (int y = 0; y < keypoints[x].size(); y++)
-              std::cout << keypoints[x][y] << " ";
-        std::cout << std::endl;
-    }
 }
 
 void RunInstance::loadKeypoints() {
@@ -38,6 +28,10 @@ void RunInstance::generateKeypoints() {
 
     targetKeypoints_ = featureGenerator.getTargetKeypoints();
     referenceKeypoints_ = featureGenerator.getReferenceKeypoints();
+}
+
+void RunInstance::allocateGpuMemory() {
+
 }
 
 void RunInstance::generateKeypointImage() {
