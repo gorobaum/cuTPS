@@ -22,14 +22,16 @@ public:
 			for (int i = 0; i < dimensions[0]*dimensions[1]*dimensions[2]; i++)
 				image[i] = 0;
 	}
-	std::vector<int> getDimensions() { return dimensions_; };
+    bool isTwoDimensional();
+    short* getPixelVector();
 	std::vector<short> getMinMax();
-	void changePixelAt(int x, int y, int z, short value);
+    void setPixelVector(short* vector);
 	short getPixelAt(int x, int y, int z);
-	short trilinearInterpolation(float x, float y, float z);
 	short NNInterpolation(float x, float y, float z);
-	short* getPixelVector();
-	void setPixelVector(short* vector);
+    void changePixelAt(int x, int y, int z, short value);
+    short trilinearInterpolation(float x, float y, float z);
+    std::vector<int> getDimensions() { return dimensions_; };
+
 private:
 	short* image;
 	std::vector<int> dimensions_;

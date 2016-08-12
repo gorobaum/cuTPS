@@ -13,16 +13,13 @@ namespace tps {
 
 class CudaMemory {
 public:
-  CudaMemory() {};
-  CudaMemory(std::vector<int> dimensions, std::vector< std::vector<float> > referenceKeypoints) :
-    imageSize(dimensions[0]*dimensions[1]*dimensions[2]),
-    referenceKeypoints_(referenceKeypoints),
-    numberOfCps(referenceKeypoints.size()),
-    systemDim(numberOfCps+4) {};
-
   void freeMemory();
-  void allocCudaMemory(tps::Image& image);
   double memoryEstimation();
+  double getUsedGpuMemory();
+  void allocCudaMemory(tps::Image& image);
+  void initialize(std::vector<int> dimensions,
+                        std::vector< std::vector<float> > referenceKeypoints,
+                        Image targetImage);
 
   float* getSolutionX() { return solutionX; };
   float* getSolutionY() { return solutionY; };
@@ -36,13 +33,13 @@ public:
   float* getKeypointY() { return keypointY; };
   float* getKeypointZ() { return keypointZ; };
 
-  short* getTargetImage() { return targetImage; };
   short* getRegImage() { return regImage; };
+  short* getTargetImage() { return targetImage; };
 
   std::vector<float> getHostSolX();
   std::vector<float> getHostSolY();
   std::vector<float> getHostSolZ();
-  
+
 private:
   void allocCudaSolution();
   void allocCudaKeypoints();

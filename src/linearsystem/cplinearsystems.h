@@ -14,6 +14,8 @@ public:
     referenceKeypoints_(referenceKeypoints),
     targetKeypoints_(targetKeypoints),
     twoDimension_(twoDimension) {};
+
+  void printSolutions();
   std::vector<float> getSolutionX() {return solutionX;};
   std::vector<float> getSolutionY() {return solutionY;};
   std::vector<float> getSolutionZ() {return solutionZ;};
@@ -22,8 +24,10 @@ protected:
   void setSysDim();
   void createMatrixA3D();
   void createBs3D();
+
   void createMatrixA2D();
   void createBs2D();
+
   void adaptSolutionTo3D();
   virtual void transferMatrixA() = 0;
   virtual void transferBs() = 0;

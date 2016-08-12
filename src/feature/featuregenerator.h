@@ -13,7 +13,6 @@ public:
     void run();
 
 private:
-    bool isTwoDimensional();
     void createTargetImageFeatures();
     void createReferenceImageFeatures();
     std::vector<float> applySinDeformationTo(float x, float y, float z);

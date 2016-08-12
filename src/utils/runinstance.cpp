@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include "linearsystem/armalinearsystems.h"
+#include "linearsystem/cudalinearsystems.h"
+
 namespace tps {
 
 void RunInstance::loadData() {
@@ -28,8 +31,36 @@ void RunInstance::generateKeypoints() {
     referenceKeypoints_ = featureGenerator.getReferenceKeypoints();
 }
 
-void RunInstance::allocateGpuMemory() {
+void RunInstance::solveLinearSystem() {
+    std::string solver = configuration_.getString("linearSystemSolver");
+    // if (solver.compare("cuda") == 0)
+        solveLinearSystemWithCuda();
+    // else {
+        solveLinearSystemWithArmadillo();
+    // }
+}
 
+void RunInstance::solveLinearSystemWithCuda() {
+    bool isTwoDimensional = referenceImage_.isTwoDimensional();
+    CudaLinearSystems cudaLinearSystems(referenceKeypoints_, targetKeypoints_,
+                                        isTwoDimensional);
+
+    std::vector<int> dimensions = referenceImage_.getDimensions();
+    cudaMemory_.initialize(dimensions, referenceKeypoints_, targetImage_);
+
+    cudaLinearSystems.solveLinearSystems(cudaMemory_);
+}
+
+void RunInstance::solveLinearSystemWithArmadillo() {
+    bool isTwoDimensional = referenceImage_.isTwoDimensional();
+    ArmaLinearSystems armaLinearSystems(referenceKeypoints_, targetKeypoints_,
+                                        isTwoDimensional);
+
+    armaLinearSystems.solveLinearSystems();
+
+    solutionX_ = armaLinearSystems.getSolutionX();
+    solutionY_ = armaLinearSystems.getSolutionY();
+    solutionZ_ = armaLinearSystems.getSolutionZ();
 }
 
 void RunInstance::generateKeypointImage() {

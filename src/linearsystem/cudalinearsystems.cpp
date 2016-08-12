@@ -91,15 +91,15 @@ void tps::CudaLinearSystems::solveLinearSystem(double *B, std::vector<float>& so
   // step 3: compute QR factorization
   cusolver_status = cusolverDnDgeqrf(handle, systemDimension, systemDimension, cudaA, systemDimension, d_tau, d_work, lwork, devInfo);
   cudaDeviceSynchronize();
-  
+
   // step 4: compute Q^T*B
-  cusolver_status = cusolverDnDormqr(handle, CUBLAS_SIDE_LEFT, CUBLAS_OP_T, systemDimension, nrhs, 
+  cusolver_status = cusolverDnDormqr(handle, CUBLAS_SIDE_LEFT, CUBLAS_OP_T, systemDimension, nrhs,
     systemDimension, cudaA, systemDimension, d_tau, cudaSolution, systemDimension, d_work, lwork, devInfo);
   cudaDeviceSynchronize();
 
   // step 5: compute x = R \ Q^T*B
-  cublas_status = cublasDtrsm(cublasH, CUBLAS_SIDE_LEFT, CUBLAS_FILL_MODE_UPPER, CUBLAS_OP_N, 
-    CUBLAS_DIAG_NON_UNIT, systemDimension, nrhs, &one, cudaA, systemDimension, cudaSolution, 
+  cublas_status = cublasDtrsm(cublasH, CUBLAS_SIDE_LEFT, CUBLAS_FILL_MODE_UPPER, CUBLAS_OP_N,
+    CUBLAS_DIAG_NON_UNIT, systemDimension, nrhs, &one, cudaA, systemDimension, cudaSolution,
     systemDimension);
   cudaMemcpy(hostSolution, cudaSolution, systemDimension*sizeof(double), cudaMemcpyDeviceToHost);
   cudaDeviceSynchronize();
@@ -114,7 +114,7 @@ void tps::CudaLinearSystems::solveLinearSystem(double *B, std::vector<float>& so
   checkCuda(cudaFree(d_work));
   delete(hostSolution);
 
-  cublasDestroy(cublasH);   
+  cublasDestroy(cublasH);
   cusolverDnDestroy(handle);
 }
 

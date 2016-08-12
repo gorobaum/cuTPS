@@ -12,6 +12,17 @@ void tps::CPLinearSystems::setSysDim() {
     systemDimension = referenceKeypoints_.size()+Size3D;
 }
 
+void tps::CPLinearSystems::printSolutions() {
+    for (int i = 0; i < solutionX.size(); i++)
+        std::cout << "solutionX[" << i << "] = " << solutionX[i] << std::endl;
+
+    for (int i = 0; i < solutionY.size(); i++)
+        std::cout << "solutionY[" << i << "] = " << solutionY[i] << std::endl;
+
+    for (int i = 0; i < solutionZ.size(); i++)
+        std::cout << "solutionZ[" << i << "] = " << solutionZ[i] << std::endl;
+}
+
 void tps::CPLinearSystems::createMatrixA3D() {
   matrixA = std::vector<std::vector<float>>(systemDimension, std::vector<float>(systemDimension, 0.0));
 
@@ -28,13 +39,13 @@ void tps::CPLinearSystems::createMatrixA3D() {
 
   for (int i = 0; i < referenceKeypoints_.size(); i++)
     for (int j = 0; j < referenceKeypoints_.size(); j++) {
-      float r = computeRSquared(referenceKeypoints_[i][0], referenceKeypoints_[j][0], 
+      float r = computeRSquared(referenceKeypoints_[i][0], referenceKeypoints_[j][0],
                                 referenceKeypoints_[i][1], referenceKeypoints_[j][1],
                                 referenceKeypoints_[i][2], referenceKeypoints_[j][2]);
       if (r != 0.0) matrixA[i+Size3D][j+Size3D] = r*log(r);
     }
 }
-  
+
 void tps::CPLinearSystems::createBs3D() {
   bx = std::vector<float>(systemDimension, 0.0);
   by = std::vector<float>(systemDimension, 0.0);
@@ -45,7 +56,7 @@ void tps::CPLinearSystems::createBs3D() {
     bz[j] = targetKeypoints_[i][2];
   }
 }
-  
+
 void tps::CPLinearSystems::createMatrixA2D() {
   matrixA = std::vector<std::vector<float>>(systemDimension, std::vector<float>(systemDimension, 0.0));
 
@@ -60,12 +71,12 @@ void tps::CPLinearSystems::createMatrixA2D() {
 
   for (int i = 0; i < referenceKeypoints_.size(); i++)
     for (int j = 0; j < referenceKeypoints_.size(); j++) {
-      float r = computeRSquared2D(referenceKeypoints_[i][0], referenceKeypoints_[j][0], 
+      float r = computeRSquared2D(referenceKeypoints_[i][0], referenceKeypoints_[j][0],
                                 referenceKeypoints_[i][1], referenceKeypoints_[j][1]);
       if (r != 0.0) matrixA[i+Size2D][j+Size2D] = r*log(r);
     }
 }
-  
+
 void tps::CPLinearSystems::createBs2D() {
   bx = std::vector<float>(systemDimension, 0.0);
   by = std::vector<float>(systemDimension, 0.0);
@@ -74,7 +85,7 @@ void tps::CPLinearSystems::createBs2D() {
   for (int j = Size2D, i = 0; j < systemDimension; i++, j++) {
     bx[j] = targetKeypoints_[i][0];
     by[j] = targetKeypoints_[i][1];
-  } 
+  }
 }
 
 void tps::CPLinearSystems::adaptSolutionTo3D() {

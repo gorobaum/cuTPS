@@ -12,6 +12,16 @@ cudaError_t checkCuda(cudaError_t result)
     return result;
 }
 
+void tps::CudaMemory::initialize(std::vector<int> dimensions,
+                      std::vector< std::vector<float> > referenceKeypoints,
+                      tps::Image targetImage) {
+    imageSize = dimensions[0]*dimensions[1]*dimensions[2];
+    referenceKeypoints_ = referenceKeypoints;
+    numberOfCps = referenceKeypoints.size();
+    systemDim = numberOfCps + 4;
+    allocCudaMemory(targetImage);
+}
+
 void tps::CudaMemory::allocCudaMemory(tps::Image& image) {
   allocCudaSolution();
   allocCudaKeypoints();
@@ -95,10 +105,18 @@ std::vector<float> tps::CudaMemory::cudaToHost(float *cudaMemory) {
     float *hostSolPointer = (float*)malloc(systemDim*sizeof(float));
     cudaMemcpy(hostSolPointer, cudaMemory, systemDim*sizeof(float), cudaMemcpyDeviceToHost);
     std::vector<float> hostSol;
-    for (int i =0; i < systemDim; i++) 
+    for (int i =0; i < systemDim; i++)
       hostSol.push_back(hostSolPointer[i]);
     delete(hostSolPointer);
     return hostSol;
+}
+
+double tps::CudaMemory::getUsedGpuMemory() {
+    size_t avail;
+    size_t total;
+    cudaMemGetInfo( &avail, &total );
+    size_t used = (total - avail)/(1024*1024);
+    return used;
 }
 
 double tps::CudaMemory::memoryEstimation() {

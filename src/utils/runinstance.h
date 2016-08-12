@@ -8,6 +8,7 @@
 #include "configuration.h"
 #include "image/imagehandler.h"
 #include "feature/featuregenerator.h"
+#include "linearsystem/cplinearsystems.h"
 
 namespace tps {
 
@@ -22,13 +23,13 @@ public:
     void loadData();
     void executeTps();
     void solveLinearSystem();
-    void allocateGpuMemory();
 
 private:
     void loadKeypoints();
     void generateKeypoints();
     void generateKeypointImage();
 
+    void allocateGpuMemory();
     void solveLinearSystemWithCuda();
     void solveLinearSystemWithArmadillo();
 
@@ -38,11 +39,15 @@ private:
 
     Image loadImageData(std::string configString);
 
+    CudaMemory cudaMemory_;
     ImageHandler* imageHandler_;
     Configuration configuration_;
 
     Image targetImage_;
     Image referenceImage_;
+    std::vector<float> solutionX_;
+    std::vector<float> solutionY_;
+    std::vector<float> solutionZ_;
     std::vector< std::vector<float> > targetKeypoints_;
     std::vector< std::vector<float> > referenceKeypoints_;
 };

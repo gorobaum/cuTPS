@@ -5,6 +5,9 @@ namespace tps {
 void Controller::exec() {
     for (std::vector<RunInstance>::iterator it = runInstances_.begin(); it != runInstances_.end(); it++)
         it->loadData();
+
+    for (std::vector<RunInstance>::iterator it = runInstances_.begin(); it != runInstances_.end(); it++)
+        it->solveLinearSystem();
 }
 
 void Controller::readConfigurationFile(std::string masterConfigFilePath) {

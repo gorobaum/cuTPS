@@ -48,11 +48,6 @@ void tps::FeatureGenerator::createTargetImageFeatures() {
       }
 }
 
-bool tps::FeatureGenerator::isTwoDimensional() {
-    std::vector<int> dimensions = referenceImage_.getDimensions();
-    return (dimensions[2] == 1);
-}
-
 std::vector<float> tps::FeatureGenerator::applySinDeformationTo(float x, float y, float z) {
   std::vector<float> newPoint;
   // newX = x - 2.0*std::sin(y/32.0) + 2.0*std::cos(z/16.0);
@@ -61,7 +56,7 @@ std::vector<float> tps::FeatureGenerator::applySinDeformationTo(float x, float y
   float newY = y + 4.0*std::cos(z/8.0) - 8.0*std::sin(x/32.0);
   // newZ = z - 2.0*std::sin(x/16.0) + 4.0*std::cos(y/16.0);
   float newZ;
-  if (isTwoDimensional())
+  if (referenceImage_.isTwoDimensional())
     newZ = 0.0;
   else
     newZ = z - 2.0*std::sin(x/16.0) + 4.0*std::cos(y/16.0);

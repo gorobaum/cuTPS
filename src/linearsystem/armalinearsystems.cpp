@@ -25,7 +25,6 @@ void tps::ArmaLinearSystems::solveLinearSystems() {
 
   double time = timer.toc();
   std::cout << "Arma solver execution time: " << time << std::endl;
-
 }
 
 std::vector<float> tps::ArmaLinearSystems::solveLinearSystem(arma::vec b) {
@@ -36,7 +35,7 @@ std::vector<float> tps::ArmaLinearSystems::solveLinearSystem(arma::vec b) {
 
   for (uint i = 0; i < systemDimension; i++)
     solution.push_back(armaSol(i));
-  
+
   return solution;
 }
 

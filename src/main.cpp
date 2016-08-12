@@ -11,9 +11,14 @@ int main(int argc, char** argv) {
     std::cout << "/t ./tps <configuration file>" << std::endl;
     return 0;
   }
+  cudaDeviceReset();
+  cudaThreadExit();
 
   tps::Controller controller(argv[1]);
   controller.exec();
+
+  cudaThreadExit();
+  cudaDeviceReset();
 
   return 0;
 }
