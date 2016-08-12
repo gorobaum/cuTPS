@@ -5,8 +5,8 @@
 
 #include "cudamemory.h"
 #include "image/image.h"
-#include "configuration.h"
 #include "image/imagehandler.h"
+#include "instanceconfiguration.h"
 #include "feature/featuregenerator.h"
 #include "linearsystem/cplinearsystems.h"
 
@@ -18,7 +18,7 @@ public:
                 ImageHandler* imageHandler) :
         referenceImage_(referenceImage),
         imageHandler_(imageHandler),
-        configuration_(configurationFilePath) {}
+        instanceConfiguration_(configurationFilePath) {}
 
     void loadData();
     void executeTps();
@@ -41,7 +41,7 @@ private:
 
     CudaMemory cudaMemory_;
     ImageHandler* imageHandler_;
-    Configuration configuration_;
+    InstanceConfiguration instanceConfiguration_;
 
     Image targetImage_;
     Image referenceImage_;

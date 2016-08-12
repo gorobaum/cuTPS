@@ -27,10 +27,10 @@ cuda_add_executable(tps
   src/linearsystem/cudalinearsystems.cpp
   src/linearsystem/armalinearsystems.cpp
 
-  src/utils/cudamemory.cxx
+  src/utils/cudamemory.cpp
   src/utils/controller.cpp
   src/utils/runinstance.cpp
-  src/utils/configuration.cpp
+  src/utils/instanceconfiguration.cpp
   )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -fpermissive -include cstddef")

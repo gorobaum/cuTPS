@@ -13,17 +13,17 @@ void RunInstance::loadData() {
 }
 
 void RunInstance::loadKeypoints() {
-    if (configuration_.isCallFeatureGenerator())
+    if (instanceConfiguration_.isCallFeatureGenerator())
         generateKeypoints();
     else {
-        targetKeypoints_ = configuration_.getFloatVector("targetKeypoints");
-        referenceKeypoints_ = configuration_.getFloatVector("referenceKeypoints");
+        targetKeypoints_ = instanceConfiguration_.getFloatVector("targetKeypoints");
+        referenceKeypoints_ = instanceConfiguration_.getFloatVector("referenceKeypoints");
     }
     generateKeypointImage();
 }
 
 void RunInstance::generateKeypoints() {
-    float percentage = configuration_.getFloat("percentage");
+    float percentage = instanceConfiguration_.getFloat("percentage");
     FeatureGenerator featureGenerator(referenceImage_, targetImage_, percentage);
     featureGenerator.run();
 
@@ -32,12 +32,14 @@ void RunInstance::generateKeypoints() {
 }
 
 void RunInstance::solveLinearSystem() {
-    std::string solver = configuration_.getString("linearSystemSolver");
-    // if (solver.compare("cuda") == 0)
+    std::string solver = instanceConfiguration_.getString("linearSystemSolver");
+    if (solver.compare("cuda") == 0)
         solveLinearSystemWithCuda();
-    // else {
+    else if (solver.compare("armadillo") == 0) {
         solveLinearSystemWithArmadillo();
-    // }
+    } else {
+        std::cout << "The solver \"" << solver << "\" isn't present." << std::endl;
+    }
 }
 
 void RunInstance::solveLinearSystemWithCuda() {
@@ -77,7 +79,7 @@ void RunInstance::generateKeypointImage() {
 }
 
 Image RunInstance::loadImageData(std::string configString) {
-    std::string imagePath = configuration_.getString(configString);
+    std::string imagePath = instanceConfiguration_.getString(configString);
     return imageHandler_->loadImageData(imagePath);
 }
 
