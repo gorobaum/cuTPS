@@ -27,6 +27,11 @@ cuda_add_executable(tps
   src/linearsystem/cudalinearsystems.cpp
   src/linearsystem/armalinearsystems.cpp
 
+  src/tps/basictps.cpp
+  src/tps/paralleltps.cpp
+  src/tps/cudatps.cpp
+  src/tps/cutps.cu
+
   src/utils/cudamemory.cpp
   src/utils/controller.cpp
   src/utils/runinstance.cpp
