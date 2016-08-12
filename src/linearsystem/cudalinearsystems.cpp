@@ -44,6 +44,7 @@ void tps::CudaLinearSystems::solveLinearSystems(tps::CudaMemory& cm) {
 
   if (twoDimension_)
     adaptSolutionTo3D();
+    
   cm.setSolutionX(solutionX);
   cm.setSolutionY(solutionY);
   cm.setSolutionZ(solutionZ);

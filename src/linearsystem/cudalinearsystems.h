@@ -10,6 +10,7 @@ class CudaLinearSystems : public CPLinearSystems {
 using CPLinearSystems::CPLinearSystems;
 public:
   void solveLinearSystems(tps::CudaMemory& cm);
+  
 private:
   void solveLinearSystem(double *B, std::vector<float>& solution);
   std::vector<float> pointerToVector(double *pointer);

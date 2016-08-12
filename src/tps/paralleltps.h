@@ -12,18 +12,14 @@ namespace tps {
 
 class ParallelTPS : public TPS {
 public:
-  ParallelTPS(std::vector< std::vector<float> > referenceKeypoints, std::vector< std::vector<float> > targetKeypoints,
-              tps::Image targetImage, bool twoDimension) :
-    TPS(referenceKeypoints, targetKeypoints, targetImage),
-    lienarSolver(referenceKeypoints, targetKeypoints, twoDimension) {};
-  tps::Image run();
+    using TPS::TPS;
+
+    tps::Image run();
+
 private:
-  tps::ArmaLinearSystems lienarSolver;
-  uint numberOfThreads = std::thread::hardware_concurrency();
-  std::vector<float> solutionX;
-  std::vector<float> solutionY;
-  std::vector<float> solutionZ;
-  void runThread(uint tid);
+    void runThread(uint tid);
+
+    uint numberOfThreads = std::thread::hardware_concurrency();
 };
 
 } // namespace

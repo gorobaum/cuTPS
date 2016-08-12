@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include "tps/cudatps.h"
+#include "tps/basictps.h"
+#include "tps/paralleltps.h"
 #include "linearsystem/armalinearsystems.h"
 #include "linearsystem/cudalinearsystems.h"
 
@@ -32,14 +35,42 @@ void RunInstance::generateKeypoints() {
 }
 
 void RunInstance::solveLinearSystem() {
-    std::string solver = instanceConfiguration_.getString("linearSystemSolver");
-    if (solver.compare("cuda") == 0)
+    std::string solverConfig = instanceConfiguration_.getString("linearSystemSolver");
+    if (solverConfig.compare("cuda") == 0)
         solveLinearSystemWithCuda();
-    else if (solver.compare("armadillo") == 0) {
+    else if (solverConfig.compare("armadillo") == 0) {
         solveLinearSystemWithArmadillo();
     } else {
-        std::cout << "The solver \"" << solver << "\" isn't present." << std::endl;
+        std::cout << "The solver \"" << solverConfig << "\" isn't present." << std::endl;
     }
+}
+
+void RunInstance::executeTps() {
+    std::string tpsConfig = instanceConfiguration_.getString("tps");
+    Image result(referenceImage_.getDimensions());
+
+    if (tpsConfig.compare("basic") == 0)
+        result = executeBasicTps();
+    else if (tpsConfig.compare("parallel") == 0) {
+        result = executeParallelTps();
+    } else {
+        std::cout << "The TPS algorithm \"" << tpsConfig << "\" isn't present." << std::endl;
+    }
+
+    std::string resultImage = instanceConfiguration_.getString("resultImage");
+    imageHandler_->saveImageData(result, resultImage);
+}
+
+Image RunInstance::executeBasicTps() {
+    BasicTPS basicTps(referenceKeypoints_, targetKeypoints_, targetImage_);
+    basicTps.setLinearSystemSolutions(solutionX_, solutionY_, solutionZ_);
+    return basicTps.run();
+}
+
+Image RunInstance::executeParallelTps() {
+    ParallelTPS parallelTps(referenceKeypoints_, targetKeypoints_, targetImage_);
+    parallelTps.setLinearSystemSolutions(solutionX_, solutionY_, solutionZ_);
+    return parallelTps.run();
 }
 
 void RunInstance::solveLinearSystemWithCuda() {
@@ -51,6 +82,10 @@ void RunInstance::solveLinearSystemWithCuda() {
     cudaMemory_.initialize(dimensions, referenceKeypoints_, targetImage_);
 
     cudaLinearSystems.solveLinearSystems(cudaMemory_);
+
+    solutionX_ = cudaLinearSystems.getSolutionX();
+    solutionY_ = cudaLinearSystems.getSolutionY();
+    solutionZ_ = cudaLinearSystems.getSolutionZ();
 }
 
 void RunInstance::solveLinearSystemWithArmadillo() {

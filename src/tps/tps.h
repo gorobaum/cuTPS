@@ -11,7 +11,8 @@ namespace tps {
 
 class TPS {
 public:
-    TPS(std::vector< std::vector<float> > referenceKeypoints, std::vector< std::vector<float> > targetKeypoints,
+    TPS(std::vector< std::vector<float> > referenceKeypoints,
+        std::vector< std::vector<float> > targetKeypoints,
         tps::Image targetImage) :
             referenceKeypoints_(referenceKeypoints),
             targetKeypoints_(targetKeypoints),
@@ -20,7 +21,14 @@ public:
             registredImage(targetImage.getDimensions()) {};
 
   virtual tps::Image run() = 0;
-  
+  void setLinearSystemSolutions(std::vector<float> solutionX,
+                                 std::vector<float> solutionY,
+                                 std::vector<float> solutionZ) {
+                                    solutionX_ = solutionX;
+                                    solutionY_ = solutionY;
+                                    solutionZ_ = solutionZ;
+                                 };
+
 protected:
     float computeRSquared(float x, float xi, float y, float yi, float z, float zi)
         {return pow(x-xi,2) + pow(y-yi,2) + pow(z-zi,2);};
@@ -28,6 +36,9 @@ protected:
     tps::Image targetImage_;
     tps::Image registredImage;
     std::vector<int> dimensions_;
+    std::vector<float> solutionX_;
+    std::vector<float> solutionY_;
+    std::vector<float> solutionZ_;
     std::vector< std::vector<float> > targetKeypoints_;
     std::vector< std::vector<float> > referenceKeypoints_;
 };

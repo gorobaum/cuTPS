@@ -33,9 +33,9 @@ private:
     void solveLinearSystemWithCuda();
     void solveLinearSystemWithArmadillo();
 
-    void executeCudaTps();
-    void executeBasicTps();
-    void executeParallelTps();
+    Image executeCudaTps();
+    Image executeBasicTps();
+    Image executeParallelTps();
 
     Image loadImageData(std::string configString);
 

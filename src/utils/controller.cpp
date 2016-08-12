@@ -8,6 +8,9 @@ void Controller::exec() {
 
     for (std::vector<RunInstance>::iterator it = runInstances_.begin(); it != runInstances_.end(); it++)
         it->solveLinearSystem();
+
+    for (std::vector<RunInstance>::iterator it = runInstances_.begin(); it != runInstances_.end(); it++)
+        it->executeTps();
 }
 
 void Controller::readConfigurationFile(std::string masterConfigFilePath) {
