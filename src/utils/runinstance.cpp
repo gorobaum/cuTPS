@@ -13,6 +13,8 @@ namespace tps {
 void RunInstance::loadData() {
     targetImage_ = loadImageData("targetImage");
     loadKeypoints();
+    std::vector<int> dimensions = referenceImage_.getDimensions();
+    cudaMemory_.initialize(dimensions, referenceKeypoints_, targetImage_);
 }
 
 void RunInstance::loadKeypoints() {
@@ -77,7 +79,15 @@ Image RunInstance::executeParallelTps() {
 
 Image RunInstance::executeCudaTps() {
     CudaTPS cudaTps(referenceKeypoints_, targetKeypoints_, targetImage_);
+
+    std::string solverConfig = instanceConfiguration_.getString("linearSystemSolver");
+    if (solverConfig.compare("armadillo") == 0) {
+        cudaMemory_.setSolutionX(solutionX_);
+        cudaMemory_.setSolutionY(solutionY_);
+        cudaMemory_.setSolutionZ(solutionZ_);
+    }
     cudaTps.setCudaMemory(cudaMemory_);
+
     return cudaTps.run();
 }
 
@@ -85,9 +95,6 @@ void RunInstance::solveLinearSystemWithCuda() {
     bool isTwoDimensional = referenceImage_.isTwoDimensional();
     CudaLinearSystems cudaLinearSystems(referenceKeypoints_, targetKeypoints_,
                                         isTwoDimensional);
-
-    std::vector<int> dimensions = referenceImage_.getDimensions();
-    cudaMemory_.initialize(dimensions, referenceKeypoints_, targetImage_);
 
     cudaLinearSystems.solveLinearSystems(cudaMemory_);
 

@@ -16,9 +16,6 @@ public:
     void setCudaMemory(tps::CudaMemory cm);
 
 private:
-    float* solutionPointer(std::vector<float> solution);
-
-    bool isCmSet = false;
     tps::CudaMemory cm_;
 };
 

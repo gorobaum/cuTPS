@@ -98,7 +98,7 @@ void showExecutionTime(cudaEvent_t *start, cudaEvent_t *stop, std::string output
   std::cout << output << elapsedTime << " ms\n";
 }
 
-short* runTPSCUDAwithCm(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs) {
+short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs) {
   dim3 threadsPerBlock(8, 8, 8);
   dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
                  std::ceil(1.0*dimensions[1]/threadsPerBlock.y),

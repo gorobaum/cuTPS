@@ -29,6 +29,7 @@ void tps::CudaMemory::allocCudaMemory(tps::Image& image) {
 }
 
 void tps::CudaMemory::allocCudaSolution() {
+    std::cout << "DAEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEES" << std::endl;
   checkCuda(cudaMalloc(&solutionX, systemDim*sizeof(float)));
   checkCuda(cudaMalloc(&solutionY, systemDim*sizeof(float)));
   checkCuda(cudaMalloc(&solutionZ, systemDim*sizeof(float)));
@@ -85,6 +86,7 @@ float* vectorToPointer(std::vector<float> input) {
 
 void tps::CudaMemory::setSolutionX(std::vector<float> solution) {
   float* solPointer = vectorToPointer(solution);
+  std::cout << systemDim*sizeof(float) << std::endl;
   checkCuda(cudaMemcpy(solutionX, solPointer, systemDim*sizeof(float), cudaMemcpyHostToDevice));
   free(solPointer);
 }
