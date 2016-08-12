@@ -10,18 +10,16 @@ namespace tps {
 
 class CudaTPS : public TPS {
 public:
-    CudaTPS(std::vector< std::vector<float> > referenceKeypoints,
-            std::vector< std::vector<float> > targetKeypoints,
-            tps::Image targetImage, tps::CudaMemory& cm) :
-        TPS(referenceKeypoints, targetKeypoints, targetImage),
-        cm_(cm) {};
+    using TPS::TPS;
 
     tps::Image run();
+    void setCudaMemory(tps::CudaMemory cm);
 
 private:
     float* solutionPointer(std::vector<float> solution);
 
-    tps::CudaMemory& cm_;
+    bool isCmSet = false;
+    tps::CudaMemory cm_;
 };
 
 }

@@ -53,6 +53,8 @@ void RunInstance::executeTps() {
         result = executeBasicTps();
     else if (tpsConfig.compare("parallel") == 0) {
         result = executeParallelTps();
+    } else if (tpsConfig.compare("cuda") == 0) {
+        result = executeCudaTps();
     } else {
         std::cout << "The TPS algorithm \"" << tpsConfig << "\" isn't present." << std::endl;
     }
@@ -71,6 +73,12 @@ Image RunInstance::executeParallelTps() {
     ParallelTPS parallelTps(referenceKeypoints_, targetKeypoints_, targetImage_);
     parallelTps.setLinearSystemSolutions(solutionX_, solutionY_, solutionZ_);
     return parallelTps.run();
+}
+
+Image RunInstance::executeCudaTps() {
+    CudaTPS cudaTps(referenceKeypoints_, targetKeypoints_, targetImage_);
+    cudaTps.setCudaMemory(cudaMemory_);
+    return cudaTps.run();
 }
 
 void RunInstance::solveLinearSystemWithCuda() {

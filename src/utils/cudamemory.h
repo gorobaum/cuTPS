@@ -18,8 +18,8 @@ public:
   double getUsedGpuMemory();
   void allocCudaMemory(tps::Image& image);
   void initialize(std::vector<int> dimensions,
-                        std::vector< std::vector<float> > referenceKeypoints,
-                        Image targetImage);
+                  std::vector< std::vector<float> > referenceKeypoints,
+                  Image targetImage);
 
   float* getSolutionX() { return solutionX; };
   float* getSolutionY() { return solutionY; };

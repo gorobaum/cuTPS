@@ -7,6 +7,6 @@
 
 int getBlockSize();
 
-short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs);
+short* runTPSCUDAwithCm(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs);
 
 #endif

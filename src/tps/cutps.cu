@@ -26,7 +26,7 @@ __device__ short cudaGetPixel(int x, int y, int z, short* image, int width, int 
 }
 
 // Kernel definition
-__device__ short cudaTrilinearInterpolation(float x, float y, float z, short* image, 
+__device__ short cudaTrilinearInterpolation(float x, float y, float z, short* image,
                                             int width, int height, int slices) {
   int u = trunc(x);
   int v = trunc(y);
@@ -57,8 +57,8 @@ __device__ short cudaTrilinearInterpolation(float x, float y, float z, short* im
 }
 
 // Kernel definition
-__global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX, float* solutionY, 
-                        float* solutionZ, int width, int height, int slices, float* keyX, float* keyY, 
+__global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX, float* solutionY,
+                        float* solutionZ, int width, int height, int slices, float* keyX, float* keyY,
                         float* keyZ, int numOfKeys) {
   int x = blockDim.x*blockIdx.x + threadIdx.x;
   int y = blockDim.y*blockIdx.y + threadIdx.y;
@@ -98,7 +98,7 @@ void showExecutionTime(cudaEvent_t *start, cudaEvent_t *stop, std::string output
   std::cout << output << elapsedTime << " ms\n";
 }
 
-short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs) {
+short* runTPSCUDAwithCm(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs) {
   dim3 threadsPerBlock(8, 8, 8);
   dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
                  std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
@@ -114,8 +114,8 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
   cudaEvent_t start, stop;
   startTimeRecord(&start, &stop);
 
-  tpsCuda<<<numBlocks, threadsPerBlock>>>(cm.getTargetImage(), cm.getRegImage(), cm.getSolutionX(), cm.getSolutionY(), 
-                                          cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(), 
+  tpsCuda<<<numBlocks, threadsPerBlock>>>(cm.getTargetImage(), cm.getRegImage(), cm.getSolutionX(), cm.getSolutionY(),
+                                          cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(),
                                           cm.getKeypointY(), cm.getKeypointZ(), numberOfCPs);
   checkCuda(cudaDeviceSynchronize());
   checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
