@@ -14,8 +14,11 @@ namespace tps {
 void RunInstance::loadData() {
     targetImage_ = loadImageData("targetImage");
     loadKeypoints();
-    std::vector<int> dimensions = referenceImage_.getDimensions();
-    cudaMemory_.initialize(dimensions, referenceKeypoints_, targetImage_);
+
+    if (GlobalConfiguration::getInstance().isCuda()) {
+        std::vector<int> dimensions = referenceImage_.getDimensions();
+        cudaMemory_.initialize(dimensions, referenceKeypoints_);
+    }
 }
 
 void RunInstance::loadKeypoints() {
@@ -35,6 +38,10 @@ void RunInstance::generateKeypoints() {
 
     targetKeypoints_ = featureGenerator.getTargetKeypoints();
     referenceKeypoints_ = featureGenerator.getReferenceKeypoints();
+}
+
+void RunInstance::allocCudaMemory() {
+    cudaMemory_.allocCudaMemory(targetImage_);
 }
 
 void RunInstance::solveLinearSystem() {
@@ -65,6 +72,7 @@ void RunInstance::executeTps() {
 
     std::string resultImage = instanceConfiguration_.getString("resultImage");
     imageHandler_->saveImageData(result, resultImage);
+    isDone_ = true;
 }
 
 Image RunInstance::executeBasicTps() {
@@ -128,6 +136,10 @@ void RunInstance::generateKeypointImage() {
             result.changePixelAt(x, y, z, 255);
         }
     imageHandler_->saveImageData(result, "keypoints");
+}
+
+double RunInstance::getEstimateGpuMemory() {
+    return cudaMemory_.memoryEstimation();
 }
 
 Image RunInstance::loadImageData(std::string configString) {

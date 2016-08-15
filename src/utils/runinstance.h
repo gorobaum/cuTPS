@@ -18,11 +18,17 @@ public:
                 ImageHandler* imageHandler) :
         referenceImage_(referenceImage),
         imageHandler_(imageHandler),
-        instanceConfiguration_(configurationFilePath) {}
+        instanceConfiguration_(configurationFilePath) {
+            isDone_ = false;
+        }
 
     void loadData();
     void executeTps();
+    void allocCudaMemory();
     void solveLinearSystem();
+
+    bool isDone() {return isDone_;};
+    double getEstimateGpuMemory();
 
 private:
     void loadKeypoints();
@@ -43,6 +49,7 @@ private:
     ImageHandler* imageHandler_;
     InstanceConfiguration instanceConfiguration_;
 
+    bool isDone_;
     Image targetImage_;
     Image referenceImage_;
     std::vector<float> solutionX_;
