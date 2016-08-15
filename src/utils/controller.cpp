@@ -1,4 +1,5 @@
 #include "controller.h"
+#include "globalconfiguration.h"
 
 namespace tps {
 
@@ -14,22 +15,19 @@ void Controller::exec() {
 }
 
 void Controller::readConfigurationFile(std::string masterConfigFilePath) {
-    std::ifstream infile;
+    GlobalConfiguration::getInstance().loadConfigurationFile(masterConfigFilePath);
 
-    infile.open(masterConfigFilePath.c_str());
-
-    std::string referenceImagePath;
-    std::getline(infile, referenceImagePath);
+    std::string referenceImagePath = GlobalConfiguration::getInstance().getString("referenceImage");
 
     // Based on the reference image name, load the correct ImageHandler and
     // load the reference image data to the memory
     ImageHandler* imageHandler = getCorrectImageHandler(referenceImagePath);
     Image referenceImage = imageHandler->loadImageData(referenceImagePath);
 
-    std::string newInstanceConfigurationFile;
-    while (std::getline(infile, newInstanceConfigurationFile)) {
-        RunInstance newRunInstance(newInstanceConfigurationFile, referenceImage,
-                                   imageHandler);
+    std::vector<std::string> targetFiles = GlobalConfiguration::getInstance().getTargetFiles();
+
+    for (std::vector<std::string>::iterator it = targetFiles.begin(); it != targetFiles.end(); it++) {
+        RunInstance newRunInstance(*it, referenceImage, imageHandler);
         runInstances_.push_back(newRunInstance);
     }
 }

@@ -1,2 +1,4 @@
-/home/goroba/reps/tps-c/images/grid-Ref.png
+referenceImage:/home/goroba/reps/tps-c/images/grid-Ref.png
+linearSystemSolver:cuda
+tps:cuda
 /home/goroba/reps/newTPS/configurations/config1.tps
