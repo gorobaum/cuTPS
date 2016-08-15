@@ -73,6 +73,8 @@ void RunInstance::executeTps() {
     std::string resultImage = instanceConfiguration_.getString("resultImage");
     imageHandler_->saveImageData(result, resultImage);
     isDone_ = true;
+    if (GlobalConfiguration::getInstance().isCuda())
+        cudaMemory_.freeMemory();
 }
 
 Image RunInstance::executeBasicTps() {
