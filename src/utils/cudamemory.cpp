@@ -13,13 +13,11 @@ cudaError_t checkCuda(cudaError_t result)
 }
 
 void tps::CudaMemory::initialize(std::vector<int> dimensions,
-                      std::vector< std::vector<float> > referenceKeypoints,
-                      tps::Image targetImage) {
+                      std::vector< std::vector<float> > referenceKeypoints) {
     imageSize = dimensions[0]*dimensions[1]*dimensions[2];
     referenceKeypoints_ = referenceKeypoints;
     numberOfCps = referenceKeypoints.size();
     systemDim = numberOfCps + 4;
-    allocCudaMemory(targetImage);
 }
 
 void tps::CudaMemory::allocCudaMemory(tps::Image& image) {
@@ -109,6 +107,13 @@ std::vector<float> tps::CudaMemory::cudaToHost(float *cudaMemory) {
       hostSol.push_back(hostSolPointer[i]);
     delete(hostSolPointer);
     return hostSol;
+}
+
+double tps::CudaMemory::getGpuMemory() {
+    size_t avail;
+    size_t total;
+    cudaMemGetInfo( &avail, &total );
+    return total/(1024*1024);
 }
 
 double tps::CudaMemory::getUsedGpuMemory() {

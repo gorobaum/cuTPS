@@ -25,6 +25,15 @@ void GlobalConfiguration::loadConfigurationFile(std::string configurationFile) {
     }
 }
 
+bool GlobalConfiguration::isCuda() {
+    std::string solverConfig = getString("linearSystemSolver");
+    std::string tpsConfig = getString("tps");
+
+    bool cuda = (solverConfig.compare("cuda") == 0) || (tpsConfig.compare("cuda") == 0);
+
+    return cuda;
+}
+
 std::map<std::string,std::string>::iterator GlobalConfiguration::findInConfiguration(std::string configurationName) {
     std::map<std::string,std::string>::iterator pair = currentConfiguration_.find(configurationName);
 
