@@ -5,6 +5,7 @@
 #include "tps/cudatps.h"
 #include "tps/basictps.h"
 #include "tps/paralleltps.h"
+#include "globalconfiguration.h"
 #include "linearsystem/armalinearsystems.h"
 #include "linearsystem/cudalinearsystems.h"
 
@@ -37,7 +38,7 @@ void RunInstance::generateKeypoints() {
 }
 
 void RunInstance::solveLinearSystem() {
-    std::string solverConfig = instanceConfiguration_.getString("linearSystemSolver");
+    std::string solverConfig = GlobalConfiguration::getInstance().getString("linearSystemSolver");
     if (solverConfig.compare("cuda") == 0)
         solveLinearSystemWithCuda();
     else if (solverConfig.compare("armadillo") == 0) {
@@ -48,8 +49,9 @@ void RunInstance::solveLinearSystem() {
 }
 
 void RunInstance::executeTps() {
-    std::string tpsConfig = instanceConfiguration_.getString("tps");
     Image result(referenceImage_.getDimensions());
+
+    std::string tpsConfig = GlobalConfiguration::getInstance().getString("tps");
 
     if (tpsConfig.compare("basic") == 0)
         result = executeBasicTps();
@@ -80,7 +82,7 @@ Image RunInstance::executeParallelTps() {
 Image RunInstance::executeCudaTps() {
     CudaTPS cudaTps(referenceKeypoints_, targetKeypoints_, targetImage_);
 
-    std::string solverConfig = instanceConfiguration_.getString("linearSystemSolver");
+    std::string solverConfig = GlobalConfiguration::getInstance().getString("linearSystemSolver");
     if (solverConfig.compare("armadillo") == 0) {
         cudaMemory_.setSolutionX(solutionX_);
         cudaMemory_.setSolutionY(solutionY_);

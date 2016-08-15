@@ -35,6 +35,7 @@ cuda_add_executable(tps
   src/utils/cudamemory.cpp
   src/utils/controller.cpp
   src/utils/runinstance.cpp
+  src/utils/globalconfiguration.cpp
   src/utils/instanceconfiguration.cpp
   )
 
