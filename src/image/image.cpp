@@ -72,6 +72,15 @@ short* tps::Image::getPixelVector() {
   return image;
 }
 
+float* tps::Image::getFloatPixelVector() {
+  float* vector = (float*)malloc(dimensions_[0]*dimensions_[1]*dimensions_[2]*sizeof(float));
+    for (int x = 0; x < dimensions_[0]; x++)
+      for (int y = 0; y < dimensions_[1]; y++)
+        for (int z = 0; z < dimensions_[2]; z++)
+          vector[z*dimensions_[0]*dimensions_[1]+y*dimensions_[0]+x] = image[y+x*dimensions_[1]+z*dimensions_[0]*dimensions_[1]];
+  return vector;
+}
+
 void tps::Image::setPixelVector(short* vector) {
   for (int z = 0; z < dimensions_[2]; z++)
     for (int x = 0; x < dimensions_[0]; x++)

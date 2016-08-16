@@ -1,6 +1,9 @@
 #include "cudamemory.h"
 
 #include <cassert>
+#include <cstring>
+
+#include "globalconfiguration.h"
 
 inline
 cudaError_t checkCuda(cudaError_t result)
@@ -23,7 +26,12 @@ void tps::CudaMemory::initialize(std::vector<int> dimensions,
 void tps::CudaMemory::allocCudaMemory(tps::Image& image) {
   allocCudaSolution();
   allocCudaKeypoints();
-  allocCudaImagePixels(image);
+  bool texture = GlobalConfiguration::getInstance().getBoolean("imageTexture");
+  if (texture) {
+    allocCudaImagePixelsTexture(image);
+  } else {
+    allocCudaImagePixels(image);
+  }
 }
 
 void tps::CudaMemory::allocCudaSolution() {
@@ -54,6 +62,38 @@ void tps::CudaMemory::allocCudaKeypoints() {
   free(hostKeypointX);
   free(hostKeypointY);
   free(hostKeypointZ);
+}
+
+void tps::CudaMemory::allocCudaImagePixelsTexture(tps::Image& image) {
+  std::vector<int> dimensions = image.getDimensions();
+
+  cudaExtent volumeExtent = make_cudaExtent(dimensions[0], dimensions[1], dimensions[2]);
+
+  cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
+
+  cudaMalloc3DArray(&cuArray, &channelDesc, volumeExtent, 0);
+
+  cudaMemcpy3DParms copyParams = {0};
+  copyParams.srcPtr   = make_cudaPitchedPtr((void*)image.getFloatPixelVector(), volumeExtent.width*sizeof(float), volumeExtent.width, volumeExtent.height);
+  copyParams.dstArray = cuArray;
+  copyParams.extent   = volumeExtent;
+  copyParams.kind     = cudaMemcpyHostToDevice;
+  cudaMemcpy3D(&copyParams);
+
+  struct cudaResourceDesc resDesc;
+  memset(&resDesc, 0, sizeof(resDesc));
+  resDesc.resType = cudaResourceTypeArray;
+  resDesc.res.array.array = cuArray;
+
+  struct cudaTextureDesc texDesc;
+  memset(&texDesc, 0, sizeof(texDesc));
+  texDesc.filterMode       = cudaFilterModeLinear;
+
+  // Create texture object
+  texObj = 0;
+  cudaCreateTextureObject(&texObj, &resDesc, &texDesc, NULL);
+
+  checkCuda(cudaMalloc(&regImage, imageSize*sizeof(short)));
 }
 
 void tps::CudaMemory::allocCudaImagePixels(tps::Image& image) {

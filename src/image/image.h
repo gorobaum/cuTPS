@@ -24,6 +24,7 @@ public:
 	}
     bool isTwoDimensional();
     short* getPixelVector();
+    float* getFloatPixelVector();
 	std::vector<short> getMinMax();
     void setPixelVector(short* vector);
 	short getPixelAt(int x, int y, int z);
