@@ -44,7 +44,7 @@ void tps::CudaLinearSystems::solveLinearSystems(tps::CudaMemory& cm) {
 
   if (twoDimension_)
     adaptSolutionTo3D();
-    
+
   cm.setSolutionX(solutionX);
   cm.setSolutionY(solutionY);
   cm.setSolutionZ(solutionZ);
@@ -86,7 +86,6 @@ void tps::CudaLinearSystems::solveLinearSystem(double *B, std::vector<float>& so
 
   // step 2: query working space of geqrf and ormqr
   cusolver_status = cusolverDnDgeqrf_bufferSize(handle, systemDimension, systemDimension, cudaA, systemDimension, &lwork);
-
   checkCuda(cudaMalloc((void**)&d_work, sizeof(double) * lwork));
 
   // step 3: compute QR factorization
