@@ -5,4 +5,4 @@ calculateOccupancy:false
 parallelExecution:false
 numberOfThreads:4
 imageTexture:false
-/home/goroba/reps/newTPS/configurations/config4.tps
+/home/goroba/reps/newTPS/configurations/config1.tps

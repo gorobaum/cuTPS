@@ -9,6 +9,7 @@ struct ThreadData {
   std::vector<tps::RunInstance> executionInstances;
 };
 
+#define MAXRUNNINGINSTANCES 16
 
 namespace tps {
 
@@ -39,6 +40,7 @@ void Controller::exec() {
                     break;
                 }
             }
+            if ((lastInstaceLoaded_ - lastInstanceExecuted_) > MAXRUNNINGINSTANCES) break;
         }
 
         runLoadedInstances();
