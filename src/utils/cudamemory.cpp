@@ -125,9 +125,12 @@ double tps::CudaMemory::getUsedGpuMemory() {
 }
 
 double tps::CudaMemory::memoryEstimation() {
+  int intSize = sizeof(int);
   int floatSize = sizeof(float);
-  int doubleSize = sizeof(double);
   int ucharSize = sizeof(short);
+  int doubleSize = sizeof(double);
+
+  int sysDim = numberOfCps+4;
 
   double solutionsMemory = 3.0*systemDim*floatSize/(1024*1024);
   // std::cout << "solutionsMemory = " << solutionsMemory << std::endl;
@@ -135,8 +138,11 @@ double tps::CudaMemory::memoryEstimation() {
   // std::cout << "keypointsMemory = " << keypointsMemory << std::endl;
   double pixelsMemory = 2.0*imageSize*ucharSize/(1024*1024);
   // std::cout << "pixelsMemory = " << pixelsMemory << std::endl;
+  double solverMemory = (sysDim*sysDim*doubleSize +
+                        sysDim*doubleSize +
+                        65.0*sysDim*doubleSize)/(1024*1024);
 
-  double totalMemory = solutionsMemory+keypointsMemory+pixelsMemory;
+  double totalMemory = solutionsMemory+keypointsMemory+pixelsMemory+solverMemory;
   return totalMemory;
 }
 

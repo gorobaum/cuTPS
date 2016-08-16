@@ -26,6 +26,10 @@ void Controller::exec() {
             runInstances_[lastInstaceLoaded_].loadData();
             if (isCuda) {
                 double estimatedMemory = runInstances_[lastInstaceLoaded_].getEstimateGpuMemory();
+                if (estimatedMemory > totalGpuMemory) {
+                    std::cout << "GPU memory isn't big enough!" << std::endl;
+                    exit(-1);
+                }
                 std::cout << "Current GPU used memory = " << currentUsedMemory << "MB" << std::endl;
                 std::cout << "Current GPU estimated memory = " << estimatedMemory << "MB" << std::endl;
                 currentUsedMemory += estimatedMemory;
