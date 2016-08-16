@@ -34,8 +34,13 @@ bool GlobalConfiguration::isCuda() {
     return cuda;
 }
 
-std::map<std::string,std::string>::iterator GlobalConfiguration::findInConfiguration(std::string configurationName) {
-    std::map<std::string,std::string>::iterator pair = currentConfiguration_.find(configurationName);
+void GlobalConfiguration::printConfigs() {
+    for (std::unordered_map<std::string,std::string>::iterator it=currentConfiguration_.begin(); it!=currentConfiguration_.end(); ++it)
+        std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+}
+
+std::unordered_map<std::string,std::string>::iterator GlobalConfiguration::findInConfiguration(std::string configurationName) {
+    std::unordered_map<std::string,std::string>::iterator pair = currentConfiguration_.find(configurationName);
 
     if (pair == currentConfiguration_.end()) {
         std::cout << "The configuration \'" << configurationName <<

@@ -15,7 +15,6 @@ tps::Image tps::CudaTPS::run() {
     short *regImage;
     bool occupancy = GlobalConfiguration::getInstance().getBoolean("calculateOccupancy");
     bool texture = GlobalConfiguration::getInstance().getBoolean("imageTexture");
-    std::cout << "occupancy = " << occupancy << std::endl;
     if (texture) {
         regImage = runTPSCUDAWithText(cm_, dimensions_, referenceKeypoints_.size(), occupancy);
     } else {

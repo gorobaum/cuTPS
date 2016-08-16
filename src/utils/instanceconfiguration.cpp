@@ -28,12 +28,12 @@ bool InstanceConfiguration::isCallFeatureGenerator() {
 }
 
 void InstanceConfiguration::printConfigs() {
-    for (std::map<std::string,std::string>::iterator it=currentConfiguration_.begin(); it!=currentConfiguration_.end(); ++it)
+    for (std::unordered_map<std::string,std::string>::iterator it=currentConfiguration_.begin(); it!=currentConfiguration_.end(); ++it)
         std::cout << "map[" << it->first << "] = " << it->second << std::endl;
 }
 
-std::map<std::string,std::string>::iterator InstanceConfiguration::findInConfiguration(std::string configurationName) {
-    std::map<std::string,std::string>::iterator pair = currentConfiguration_.find(configurationName);
+std::unordered_map<std::string,std::string>::iterator InstanceConfiguration::findInConfiguration(std::string configurationName) {
+    std::unordered_map<std::string,std::string>::iterator pair = currentConfiguration_.find(configurationName);
     if (pair == currentConfiguration_.end()) {
         std::cout << "The configuration \'" << configurationName <<
                      "\' was not found. Please check the configuration file over"

@@ -208,7 +208,7 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
   checkCuda(cudaDeviceSynchronize());
   checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
 
-  showExecutionTime(&start, &stop, "callKernel without texture execution time = ");
+  showExecutionTime(&start, &stop, "callKernel execution time = ");
   return regImage;
 }
 
@@ -244,6 +244,6 @@ short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int n
   checkCuda(cudaDeviceSynchronize());
   checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
 
-  showExecutionTime(&start, &stop, "callKernel with texture execution time = ");
+  showExecutionTime(&start, &stop, "callKernel execution time = ");
   return regImage;
 }

@@ -23,6 +23,7 @@ public:
         }
 
     void loadData();
+    void printInfo();
     void executeTps();
     void allocCudaMemory();
     void solveLinearSystem();

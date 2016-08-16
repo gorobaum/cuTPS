@@ -18,7 +18,7 @@ void Controller::exec() {
     double totalGpuMemory = CudaMemory::getGpuMemory() * 0.9;
     std::vector<RunInstance> loadedInstances;
 
-    std::cout << "Max GPU memory = " << totalGpuMemory << "MB" << std::endl;
+    GlobalConfiguration::getInstance().printConfigs();
 
     while (lastInstaceLoaded_ < runInstances_.size()) {
         double currentUsedMemory = CudaMemory::getUsedGpuMemory();
@@ -31,8 +31,6 @@ void Controller::exec() {
                     std::cout << "GPU memory isn't big enough!" << std::endl;
                     exit(-1);
                 }
-                std::cout << "Current GPU used memory = " << currentUsedMemory << "MB" << std::endl;
-                std::cout << "Current GPU estimated memory = " << estimatedMemory << "MB" << std::endl;
                 currentUsedMemory += estimatedMemory;
                 if (estimatedMemory < totalGpuMemory) {
                     runInstances_[lastInstaceLoaded_].allocCudaMemory();
@@ -45,17 +43,15 @@ void Controller::exec() {
 
         runLoadedInstances();
     }
-
+    std::cout << "==========================================" << std::endl;
 }
 
 void Controller::runLoadedInstances() {
     bool parallel = GlobalConfiguration::getInstance().getBoolean("parallelExecution");
 
     if (parallel) {
-        std::cout << "Using parallel execution" << std::endl;
         runMultipleProcess();
     } else {
-        std::cout << "Using normal execution" << std::endl;
         runSingleProcess();
     }
 }

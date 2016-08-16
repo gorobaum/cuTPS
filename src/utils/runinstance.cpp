@@ -45,6 +45,8 @@ void RunInstance::allocCudaMemory() {
 }
 
 void RunInstance::solveLinearSystem() {
+    printInfo();
+    std::cout << "Running solver..." << std::endl;
     std::string solverConfig = GlobalConfiguration::getInstance().getString("linearSystemSolver");
     if (solverConfig.compare("cuda") == 0)
         solveLinearSystemWithCuda();
@@ -53,9 +55,12 @@ void RunInstance::solveLinearSystem() {
     } else {
         std::cout << "The solver \"" << solverConfig << "\" isn't present." << std::endl;
     }
+    std::cout << "------------------------------------------" << std::endl;
 }
 
 void RunInstance::executeTps() {
+    std::cout << "Running tps..." << std::endl;
+
     Image result(referenceImage_.getDimensions());
 
     std::string tpsConfig = GlobalConfiguration::getInstance().getString("tps");
@@ -75,6 +80,12 @@ void RunInstance::executeTps() {
     isDone_ = true;
     if (GlobalConfiguration::getInstance().isCuda())
         cudaMemory_.freeMemory();
+}
+
+void RunInstance::printInfo() {
+    std::cout << "==========================================" << std::endl;
+    instanceConfiguration_.printConfigs();
+    std::cout << "------------------------------------------" << std::endl;
 }
 
 Image RunInstance::executeBasicTps() {
