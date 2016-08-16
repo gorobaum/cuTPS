@@ -82,6 +82,34 @@ __global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX,
         cudaRegImage[z*height*width+x*height+y] = cudaTrilinearInterpolation(newX, newY, newZ, cudaImage, width, height, slices);
 }
 
+// Kernel definition
+__global__ void tpsCudaWithText(cudaTextureObject_t textObj, short* cudaRegImage, float* solutionX, float* solutionY,
+                        float* solutionZ, int width, int height, int slices, float* keyX, float* keyY,
+                        float* keyZ, int numOfKeys) {
+  int x = blockDim.x*blockIdx.x + threadIdx.x;
+  int y = blockDim.y*blockIdx.y + threadIdx.y;
+  int z = blockDim.z*blockIdx.z + threadIdx.z;
+
+  float newX = solutionX[0] + x*solutionX[1] + y*solutionX[2] + z*solutionX[3];
+  float newY = solutionY[0] + x*solutionY[1] + y*solutionY[2] + z*solutionY[3];
+  float newZ = solutionZ[0] + x*solutionZ[1] + y*solutionZ[2] + z*solutionZ[3];
+
+  for (int i = 0; i < numOfKeys; i++) {
+    float r = (x-keyX[i])*(x-keyX[i]) + (y-keyY[i])*(y-keyY[i]) + (z-keyZ[i])*(z-keyZ[i]);
+    float logR = r*log(r);
+    if (r != 0.0) {
+      newX += logR * solutionX[i+4];
+      newY += logR * solutionY[i+4];
+      newZ += logR * solutionZ[i+4];
+    }
+  }
+
+  if (x <= width-1 && x >= 0)
+    if (y <= height-1 && y >= 0)
+      if (z <= slices-1 && z >= 0)
+        cudaRegImage[x*slices*height+y*slices+z] = (short)tex3D<float>(textObj, newX, newY, newZ);
+}
+
 void startTimeRecord(cudaEvent_t *start, cudaEvent_t *stop) {
   checkCuda(cudaEventCreate(start));
   checkCuda(cudaEventCreate(stop));
@@ -180,6 +208,42 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
   checkCuda(cudaDeviceSynchronize());
   checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
 
-  showExecutionTime(&start, &stop, "callKernel execution time = ");
+  showExecutionTime(&start, &stop, "callKernel without texture execution time = ");
+  return regImage;
+}
+
+short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy) {
+  dim3 threadsPerBlock;
+
+  if (occupancy) {
+    int maxBlockSize = getBlockSize();
+    threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize);
+  } else {
+    threadsPerBlock.x = 8;
+    threadsPerBlock.y = 8;
+    threadsPerBlock.z = 8;
+  }
+
+  dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
+                 std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
+                 std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
+
+  short* regImage = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
+
+  for (int slice = 0; slice < dimensions[2]; slice++)
+    for (int col = 0; col < dimensions[0]; col++)
+      for (int row = 0; row < dimensions[1]; row++)
+        regImage[slice*dimensions[1]*dimensions[0]+col*dimensions[1]+row] = 0;
+
+  cudaEvent_t start, stop;
+  startTimeRecord(&start, &stop);
+
+  tpsCudaWithText<<<numBlocks, threadsPerBlock>>>(cm.getTexObj(), cm.getRegImage(), cm.getSolutionX(), cm.getSolutionY(),
+                                          cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(),
+                                          cm.getKeypointY(), cm.getKeypointZ(), numberOfCPs);
+  checkCuda(cudaDeviceSynchronize());
+  checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
+
+  showExecutionTime(&start, &stop, "callKernel with texture execution time = ");
   return regImage;
 }

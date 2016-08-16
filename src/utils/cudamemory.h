@@ -36,6 +36,7 @@ public:
 
   short* getRegImage() { return regImage; };
   short* getTargetImage() { return targetImage; };
+  cudaTextureObject_t getTexObj() { return texObj; };
 
   std::vector<float> getHostSolX();
   std::vector<float> getHostSolY();
@@ -46,10 +47,13 @@ private:
   void allocCudaKeypoints();
   void allocCudaImagePixels(tps::Image& image);
   std::vector<float> cudaToHost(float *cudaMemory);
+  void allocCudaImagePixelsTexture(tps::Image& image);
 
   int imageSize;
   int systemDim;
   int numberOfCps;
+  cudaArray* cuArray;
+  cudaTextureObject_t texObj;
   short *targetImage, *regImage;
   float *solutionX, *solutionY, *solutionZ;
   float *keypointX, *keypointY, *keypointZ;

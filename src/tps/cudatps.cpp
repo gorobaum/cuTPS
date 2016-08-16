@@ -14,8 +14,13 @@ void tps::CudaTPS::setCudaMemory(tps::CudaMemory cm) {
 tps::Image tps::CudaTPS::run() {
     short *regImage;
     bool occupancy = GlobalConfiguration::getInstance().getBoolean("calculateOccupancy");
+    bool texture = GlobalConfiguration::getInstance().getBoolean("imageTexture");
     std::cout << "occupancy = " << occupancy << std::endl;
-    regImage = runTPSCUDA(cm_, dimensions_, referenceKeypoints_.size(), occupancy);
+    if (texture) {
+        regImage = runTPSCUDAWithText(cm_, dimensions_, referenceKeypoints_.size(), occupancy);
+    } else {
+        regImage = runTPSCUDA(cm_, dimensions_, referenceKeypoints_.size(), occupancy);
+    }
 
     registredImage.setPixelVector(regImage);
 

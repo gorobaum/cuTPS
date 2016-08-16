@@ -4,5 +4,5 @@ tps:cuda
 calculateOccupancy:false
 parallelExecution:false
 numberOfThreads:4
-imageTexture:false
-/home/goroba/reps/newTPS/configurations/config1.tps
+imageTexture:true
+/home/goroba/reps/newTPS/configurations/config4.tps
