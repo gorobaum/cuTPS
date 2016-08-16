@@ -44,8 +44,13 @@ std::map<std::string,std::string>::iterator GlobalConfiguration::findInConfigura
 
     return pair;
 }
-std::string GlobalConfiguration::getString(std::string configurationName) {
-    return findInConfiguration(configurationName)->second;
+
+bool GlobalConfiguration::getBoolean(std::string key) {
+    return (getString(key).compare("true") == 0);
+}
+
+std::string GlobalConfiguration::getString(std::string key) {
+    return findInConfiguration(key)->second;
 }
 
 } // namespace

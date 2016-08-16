@@ -98,8 +98,68 @@ void showExecutionTime(cudaEvent_t *start, cudaEvent_t *stop, std::string output
   std::cout << output << elapsedTime << " ms\n";
 }
 
-short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs) {
-  dim3 threadsPerBlock(8, 8, 8);
+int getBlockSize() {
+  int maxOccupancyBlockSize = 0;
+  float maxOccupancy = 0.0;
+  int device;
+  cudaDeviceProp prop;
+  cudaGetDevice(&device);
+  cudaGetDeviceProperties(&prop, device);
+
+  for (int blockSize = 32; blockSize <= 512; blockSize += 32) {
+    int numBlocks;        // Occupancy in terms of active blocks
+
+    cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+        &numBlocks,
+        tpsCuda,
+        blockSize,
+        0);
+
+    int activeWarps = numBlocks * blockSize / prop.warpSize;
+    int maxWarps = prop.maxThreadsPerMultiProcessor / prop.warpSize;
+    float currentOccupancy = 1.0*activeWarps/maxWarps;
+    if (currentOccupancy >= maxOccupancy ) {
+      maxOccupancy = currentOccupancy;
+      maxOccupancyBlockSize = blockSize;
+    }
+  }
+  return maxOccupancyBlockSize;
+}
+
+dim3 calculateBestThreadsPerBlock(int blockSize) {
+  dim3 threadsPerBlock;
+  std::vector<int> threadsPerDim(3, 1);
+  int divisor = 8;
+
+  for (int i = 0; divisor > 1; i++) {
+    if (blockSize%divisor == 0) {
+      threadsPerDim[i%3] *= divisor;
+      blockSize /= divisor;
+    }
+    else {
+      divisor /= 2;
+    }
+  }
+
+  threadsPerBlock.x = threadsPerDim[0];
+  threadsPerBlock.y = threadsPerDim[1];
+  threadsPerBlock.z = threadsPerDim[2];
+
+  return threadsPerBlock;
+}
+
+short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy) {
+  dim3 threadsPerBlock;
+
+  if (occupancy) {
+    int maxBlockSize = getBlockSize();
+    threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize);
+  } else {
+    threadsPerBlock.x = 8;
+    threadsPerBlock.y = 8;
+    threadsPerBlock.z = 8;
+  }
+
   dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
                  std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
                  std::ceil(1.0*dimensions[2]/threadsPerBlock.z));

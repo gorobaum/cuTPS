@@ -1,8 +1,9 @@
 #include <iostream>
 #include <cmath>
 
-#include "cudatps.h"
 #include "cutps.h"
+#include "cudatps.h"
+#include "utils/globalconfiguration.h"
 
 #define MAXTHREADPBLOCK 1024
 
@@ -12,7 +13,9 @@ void tps::CudaTPS::setCudaMemory(tps::CudaMemory cm) {
 
 tps::Image tps::CudaTPS::run() {
     short *regImage;
-    regImage = runTPSCUDA(cm_, dimensions_, referenceKeypoints_.size());
+    bool occupancy = GlobalConfiguration::getInstance().getBoolean("calculateOccupancy");
+    std::cout << "occupancy = " << occupancy << std::endl;
+    regImage = runTPSCUDA(cm_, dimensions_, referenceKeypoints_.size(), occupancy);
 
     registredImage.setPixelVector(regImage);
 

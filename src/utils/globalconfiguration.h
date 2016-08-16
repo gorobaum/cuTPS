@@ -17,6 +17,7 @@ public:
     void loadConfigurationFile(std::string configurationFile);
 
     bool isCuda();
+    bool getBoolean(std::string key);
     std::string getString(std::string key);
     std::vector<std::string> getTargetFiles() {return targetFiles_;};
 
