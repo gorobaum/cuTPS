@@ -19,10 +19,16 @@ public:
 
     void exec();
     void readConfigurationFile(std::string masterConfigFilePath);
+    static void runThread(void* data);
 
 private:
+    void runSingleProcess();
+    void runMultipleProcess();
+    void runLoadedInstances();
     ImageHandler* getCorrectImageHandler(std::string referenceImagePath);
 
+    int lastInstaceLoaded_ = 0;
+    int lastInstanceExecuted_ = 0;
     std::vector<RunInstance> runInstances_;
 };
 

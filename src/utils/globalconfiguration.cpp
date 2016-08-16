@@ -49,6 +49,10 @@ bool GlobalConfiguration::getBoolean(std::string key) {
     return (getString(key).compare("true") == 0);
 }
 
+int GlobalConfiguration::getInt(std::string key) {
+    return std::stoi(getString(key));
+}
+
 std::string GlobalConfiguration::getString(std::string key) {
     return findInConfiguration(key)->second;
 }
