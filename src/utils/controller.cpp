@@ -21,11 +21,11 @@ void Controller::exec() {
     GlobalConfiguration::getInstance().printConfigs();
 
     while (lastInstaceLoaded_ < runInstances_.size()) {
-        double currentUsedMemory = CudaMemory::getUsedGpuMemory();
 
         for (lastInstaceLoaded_; lastInstaceLoaded_ < runInstances_.size(); lastInstaceLoaded_++) {
             runInstances_[lastInstaceLoaded_].loadData();
             if (isCuda) {
+                double currentUsedMemory = CudaMemory::getUsedGpuMemory();
                 double estimatedMemory = runInstances_[lastInstaceLoaded_].getEstimateGpuMemory();
                 if (estimatedMemory > totalGpuMemory) {
                     std::cout << "GPU memory isn't big enough!" << std::endl;

@@ -59,18 +59,19 @@ void tps::CudaLinearSystems::solveLinearSystem(double *B, std::vector<float>& so
   const int nrhs = 1;
   const double one = 1;
 
+  int *devInfo = NULL;
   double *cudaA = NULL;
-  double *d_work = NULL;
   double *d_tau = NULL;
+  double *d_work = NULL;
   double *cudaSolution = NULL;
   double *hostSolution = (double*)malloc(systemDimension*sizeof(double));
-  int *devInfo = NULL;
 
-  cusolverStatus_t cusolver_status;
-  cublasStatus_t cublas_status;
   cudaError_t cudaStat;
-  cusolverDnHandle_t handle;
   cublasHandle_t cublasH;
+  cusolverDnHandle_t handle;
+  cublasStatus_t cublas_status;
+  cusolverStatus_t cusolver_status;
+
   cusolverDnCreate(&handle);
   cublasCreate(&cublasH);
 

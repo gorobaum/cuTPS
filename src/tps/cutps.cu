@@ -76,6 +76,7 @@ __global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX,
       newZ += r*log(r) * solutionZ[i+4];
     }
   }
+  
   if (x <= width-1 && x >= 0)
     if (y <= height-1 && y >= 0)
       if (z <= slices-1 && z >= 0)

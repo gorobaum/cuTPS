@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <armadillo>
 
 #include "globalconfiguration.h"
 
@@ -24,101 +25,105 @@ void tps::CudaMemory::initialize(std::vector<int> dimensions,
 }
 
 void tps::CudaMemory::allocCudaMemory(tps::Image& image) {
-  allocCudaSolution();
-  allocCudaKeypoints();
-  bool texture = GlobalConfiguration::getInstance().getBoolean("imageTexture");
-  if (texture) {
-    allocCudaImagePixelsTexture(image);
-  } else {
-    allocCudaImagePixels(image);
-  }
+    arma::wall_clock timer;
+    allocCudaSolution();
+    timer.tic();
+    allocCudaKeypoints();
+    bool texture = GlobalConfiguration::getInstance().getBoolean("imageTexture");
+    if (texture) {
+        allocCudaImagePixelsTexture(image);
+    } else {
+        allocCudaImagePixels(image);
+    }
+    double time = timer.toc();
+    std::cout << "Memory copy time: " << time << std::endl;
 }
 
 void tps::CudaMemory::allocCudaSolution() {
-  checkCuda(cudaMalloc(&solutionX, systemDim*sizeof(float)));
-  checkCuda(cudaMalloc(&solutionY, systemDim*sizeof(float)));
-  checkCuda(cudaMalloc(&solutionZ, systemDim*sizeof(float)));
+    checkCuda(cudaMalloc(&solutionX, systemDim*sizeof(float)));
+    checkCuda(cudaMalloc(&solutionY, systemDim*sizeof(float)));
+    checkCuda(cudaMalloc(&solutionZ, systemDim*sizeof(float)));
 }
 
 void tps::CudaMemory::allocCudaKeypoints() {
-  float* hostKeypointX = (float*)malloc(referenceKeypoints_.size()*sizeof(float));
-  float* hostKeypointY = (float*)malloc(referenceKeypoints_.size()*sizeof(float));
-  float* hostKeypointZ = (float*)malloc(referenceKeypoints_.size()*sizeof(float));
-  for (uint i = 0; i < referenceKeypoints_.size(); i++) {
-    hostKeypointX[i] = referenceKeypoints_[i][0];
-    hostKeypointY[i] = referenceKeypoints_[i][1];
-    hostKeypointZ[i] = referenceKeypoints_[i][2];
-  }
+    float* hostKeypointX = (float*)malloc(referenceKeypoints_.size()*sizeof(float));
+    float* hostKeypointY = (float*)malloc(referenceKeypoints_.size()*sizeof(float));
+    float* hostKeypointZ = (float*)malloc(referenceKeypoints_.size()*sizeof(float));
+    for (uint i = 0; i < referenceKeypoints_.size(); i++) {
+        hostKeypointX[i] = referenceKeypoints_[i][0];
+        hostKeypointY[i] = referenceKeypoints_[i][1];
+        hostKeypointZ[i] = referenceKeypoints_[i][2];
+    }
 
-  checkCuda(cudaMalloc(&keypointX, numberOfCps*sizeof(float)));
-  checkCuda(cudaMemcpy(keypointX, hostKeypointX, numberOfCps*sizeof(float), cudaMemcpyHostToDevice));
+    checkCuda(cudaMalloc(&keypointX, numberOfCps*sizeof(float)));
+    checkCuda(cudaMemcpy(keypointX, hostKeypointX, numberOfCps*sizeof(float), cudaMemcpyHostToDevice));
 
-  checkCuda(cudaMalloc(&keypointY, numberOfCps*sizeof(float)));
-  checkCuda(cudaMemcpy(keypointY, hostKeypointY, numberOfCps*sizeof(float), cudaMemcpyHostToDevice));
+    checkCuda(cudaMalloc(&keypointY, numberOfCps*sizeof(float)));
+    checkCuda(cudaMemcpy(keypointY, hostKeypointY, numberOfCps*sizeof(float), cudaMemcpyHostToDevice));
 
-  checkCuda(cudaMalloc(&keypointZ, numberOfCps*sizeof(float)));
-  checkCuda(cudaMemcpy(keypointZ, hostKeypointZ, numberOfCps*sizeof(float), cudaMemcpyHostToDevice));
+    checkCuda(cudaMalloc(&keypointZ, numberOfCps*sizeof(float)));
+    checkCuda(cudaMemcpy(keypointZ, hostKeypointZ, numberOfCps*sizeof(float), cudaMemcpyHostToDevice));
 
-  free(hostKeypointX);
-  free(hostKeypointY);
-  free(hostKeypointZ);
+    free(hostKeypointX);
+    free(hostKeypointY);
+    free(hostKeypointZ);
 }
 
 void tps::CudaMemory::allocCudaImagePixelsTexture(tps::Image& image) {
-  std::vector<int> dimensions = image.getDimensions();
+    std::vector<int> dimensions = image.getDimensions();
 
-  cudaExtent volumeExtent = make_cudaExtent(dimensions[0], dimensions[1], dimensions[2]);
+    cudaExtent volumeExtent = make_cudaExtent(dimensions[0], dimensions[1], dimensions[2]);
 
-  cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
+    cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
 
-  cudaMalloc3DArray(&cuArray, &channelDesc, volumeExtent, 0);
+    cudaMalloc3DArray(&cuArray, &channelDesc, volumeExtent, 0);
 
-  cudaMemcpy3DParms copyParams = {0};
-  copyParams.srcPtr   = make_cudaPitchedPtr((void*)image.getFloatPixelVector(), volumeExtent.width*sizeof(float), volumeExtent.width, volumeExtent.height);
-  copyParams.dstArray = cuArray;
-  copyParams.extent   = volumeExtent;
-  copyParams.kind     = cudaMemcpyHostToDevice;
-  cudaMemcpy3D(&copyParams);
+    cudaMemcpy3DParms copyParams = {0};
+    copyParams.srcPtr   = make_cudaPitchedPtr((void*)image.getFloatPixelVector(), volumeExtent.width*sizeof(float), volumeExtent.width, volumeExtent.height);
+    copyParams.dstArray = cuArray;
+    copyParams.extent   = volumeExtent;
+    copyParams.kind     = cudaMemcpyHostToDevice;
+    cudaMemcpy3D(&copyParams);
 
-  struct cudaResourceDesc resDesc;
-  memset(&resDesc, 0, sizeof(resDesc));
-  resDesc.resType = cudaResourceTypeArray;
-  resDesc.res.array.array = cuArray;
+    struct cudaResourceDesc resDesc;
+    memset(&resDesc, 0, sizeof(resDesc));
+    resDesc.resType = cudaResourceTypeArray;
+    resDesc.res.array.array = cuArray;
 
-  struct cudaTextureDesc texDesc;
-  memset(&texDesc, 0, sizeof(texDesc));
-  texDesc.filterMode       = cudaFilterModeLinear;
+    struct cudaTextureDesc texDesc;
+    memset(&texDesc, 0, sizeof(texDesc));
+    texDesc.filterMode       = cudaFilterModeLinear;
 
-  // Create texture object
-  texObj = 0;
-  cudaCreateTextureObject(&texObj, &resDesc, &texDesc, NULL);
+    // Create texture object
+    texObj = 0;
+    cudaCreateTextureObject(&texObj, &resDesc, &texDesc, NULL);
 
-  checkCuda(cudaMalloc(&regImage, imageSize*sizeof(short)));
+    checkCuda(cudaMalloc(&regImage, imageSize*sizeof(short)));
 }
 
 void tps::CudaMemory::allocCudaImagePixels(tps::Image& image) {
-  checkCuda(cudaMalloc(&targetImage, imageSize*sizeof(short)));
-  checkCuda(cudaMemcpy(targetImage, image.getPixelVector(), imageSize*sizeof(short), cudaMemcpyHostToDevice));
-  checkCuda(cudaMalloc(&regImage, imageSize*sizeof(short)));
+    checkCuda(cudaMalloc(&targetImage, imageSize*sizeof(short)));
+    checkCuda(cudaMemcpy(targetImage, image.getPixelVector(), imageSize*sizeof(short), cudaMemcpyHostToDevice));
+    checkCuda(cudaMalloc(&regImage, imageSize*sizeof(short)));
 }
 
 std::vector<float> tps::CudaMemory::getHostSolX() {
-  return cudaToHost(solutionX);
+    return cudaToHost(solutionX);
 }
 
 std::vector<float> tps::CudaMemory::getHostSolY() {
-  return cudaToHost(solutionY);
+    return cudaToHost(solutionY);
 }
 
 std::vector<float> tps::CudaMemory::getHostSolZ() {
-  return cudaToHost(solutionZ);
+    return cudaToHost(solutionZ);
 }
 
 float* vectorToPointer(std::vector<float> input) {
-  float* output = (float*)malloc(input.size()*sizeof(float));
-  for (int i = 0; i < input.size(); i++)
-    output[i] = input[i];
-  return output;
+    float* output = (float*)malloc(input.size()*sizeof(float));
+    for (int i = 0; i < input.size(); i++)
+        output[i] = input[i];
+    return output;
 }
 
 void tps::CudaMemory::setSolutionX(std::vector<float> solution) {
