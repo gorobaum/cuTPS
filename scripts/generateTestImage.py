@@ -10,8 +10,8 @@ def deformSinusiodal(imagePixels):
 
     for col in range(imagePixels.shape[1]):
         for row in range(imagePixels.shape[0]):
-            newCol = col + 8.0*math.sin(row/16.0)
-            newRow = row - 4.0*math.cos(col/32.0)
+            newCol = col + 2.0*math.sin(row/32.0)
+            newRow = row + 8.0*math.sin(col/32.0)
             if newCol <= 0 or newCol >= imagePixels.shape[1]:
                 continue
             if newRow <= 0 or newRow >= imagePixels.shape[0]:

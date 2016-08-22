@@ -53,15 +53,14 @@ std::vector<float> tps::FeatureGenerator::applySinDeformationTo(float x, float y
   // newX = x - 2.0*std::sin(y/32.0) + 2.0*std::cos(z/16.0);
   float newX = x - 2.0*std::sin(y/32.0);
   // newY = y + 4.0*std::cos(z/8.0) - 8.0*std::sin(x/32.0);
-  float newY = y + 8.0*std::sin(x/16.0);
+  float newY = y - 8.0*std::sin(x/32.0);
   // newZ = z - 2.0*std::sin(x/16.0) + 4.0*std::cos(y/16.0);
   float newZ;
   if (referenceImage_.isTwoDimensional()) {
     newZ = 0.0;
-  }
-  else {
+  } else {
     newX += 2.0*std::cos(z/16.0);
-    newY += 4.0*std::cos(z/8.0);
+    newY += 4.0*std::sin(z/8.0);
     newZ = z - 2.0*std::sin(x/16.0) + 4.0*std::cos(y/16.0);
   }
   newPoint.push_back(newX);
