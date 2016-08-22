@@ -1,8 +1,8 @@
 referenceImage:/home/goroba/reps/tps-c/images/grid-Ref.png
 linearSystemSolver:cuda
-tps:parallel
-calculateOccupancy:false
+tps:cuda
+calculateOccupancy:true
 parallelExecution:false
 numberOfThreads:4
 imageTexture:false
-/home/goroba/reps/newTPS/configurations/config4.tps
+/home/goroba/reps/newTPS/configurations/config3.tps
