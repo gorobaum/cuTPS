@@ -1,7 +1,7 @@
 referenceImage:/home/goroba/reps/newTPS/images/gridRef512.png
 linearSystemSolver:cuda
 tps:cuda
-calculateOccupancy:false
+calculateOccupancy:true
 parallelExecution:false
 numberOfThreads:4
 imageTexture:false

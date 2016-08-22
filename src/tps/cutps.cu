@@ -76,7 +76,7 @@ __global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX,
       newZ += r*log(r) * solutionZ[i+4];
     }
   }
-  
+
   if (x <= width-1 && x >= 0)
     if (y <= height-1 && y >= 0)
       if (z <= slices-1 && z >= 0)
@@ -135,7 +135,7 @@ int getBlockSize() {
   cudaGetDevice(&device);
   cudaGetDeviceProperties(&prop, device);
 
-  for (int blockSize = 32; blockSize <= 512; blockSize += 32) {
+  for (int blockSize = 32; blockSize <= 256; blockSize += 32) {
     int numBlocks;        // Occupancy in terms of active blocks
 
     cudaOccupancyMaxActiveBlocksPerMultiprocessor(
@@ -155,14 +155,20 @@ int getBlockSize() {
   return maxOccupancyBlockSize;
 }
 
-dim3 calculateBestThreadsPerBlock(int blockSize) {
+dim3 calculateBestThreadsPerBlock(int blockSize, bool twoDim) {
   dim3 threadsPerBlock;
   std::vector<int> threadsPerDim(3, 1);
   int divisor = 8;
+  int imageDimension;
+  if (twoDim) {
+    imageDimension = 2;
+  } else {
+    imageDimension = 3;
+  }
 
   for (int i = 0; divisor > 1; i++) {
     if (blockSize%divisor == 0) {
-      threadsPerDim[i%3] *= divisor;
+      threadsPerDim[i%imageDimension] *= divisor;
       blockSize /= divisor;
     }
     else {
@@ -177,17 +183,24 @@ dim3 calculateBestThreadsPerBlock(int blockSize) {
   return threadsPerBlock;
 }
 
-short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy) {
+short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim) {
   dim3 threadsPerBlock;
 
   if (occupancy) {
     int maxBlockSize = getBlockSize();
-    threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize);
+    threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize, twoDim);
   } else {
-    threadsPerBlock.x = 8;
-    threadsPerBlock.y = 8;
-    threadsPerBlock.z = 8;
+    threadsPerBlock.x = 16;
+    threadsPerBlock.y = 16;
+    if (twoDim) {
+      threadsPerBlock.z = 1;
+    } else {
+      threadsPerBlock.z = 8;
+    }
   }
+  std::cout << "threadsPerBlock.x = " << threadsPerBlock.x << std::endl;
+  std::cout << "threadsPerBlock.y = " << threadsPerBlock.y << std::endl;
+  std::cout << "threadsPerBlock.z = " << threadsPerBlock.z << std::endl;
 
   dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
                  std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
@@ -213,17 +226,24 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
   return regImage;
 }
 
-short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy) {
+short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim) {
   dim3 threadsPerBlock;
 
   if (occupancy) {
     int maxBlockSize = getBlockSize();
-    threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize);
+    threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize, twoDim);
   } else {
-    threadsPerBlock.x = 8;
-    threadsPerBlock.y = 8;
-    threadsPerBlock.z = 8;
+    threadsPerBlock.x = 16;
+    threadsPerBlock.y = 16;
+    if (twoDim) {
+      threadsPerBlock.z = 1;
+    } else {
+      threadsPerBlock.z = 8;
+    }
   }
+  std::cout << "threadsPerBlock.x = " << threadsPerBlock.x << std::endl;
+  std::cout << "threadsPerBlock.y = " << threadsPerBlock.y << std::endl;
+  std::cout << "threadsPerBlock.z = " << threadsPerBlock.z << std::endl;
 
   dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
                  std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
