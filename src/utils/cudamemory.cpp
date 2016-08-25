@@ -186,6 +186,9 @@ double tps::CudaMemory::memoryEstimation() {
   double solverMemory = (sysDim*sysDim*doubleSize +
                         sysDim*doubleSize +
                         65.0*sysDim*doubleSize)/(1024*1024);
+  std::cout << "sysDim = " << sysDim << std::endl;
+  std::cout << "doubleSize = " << doubleSize << std::endl;
+  std::cout << "solverMemory = " << solverMemory << std::endl;
 
   double totalMemory = solutionsMemory+keypointsMemory+pixelsMemory+solverMemory;
   return totalMemory;
