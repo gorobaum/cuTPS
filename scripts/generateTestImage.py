@@ -57,22 +57,22 @@ def deformSinusiodal3D(imagePixels):
     deformedPixels = np.zeros(imagePixels.shape, np.uint8)
     deformedPixels.fill(0)
 
-    for z in range(imagePixels.shape[2]):
-        for x in range(imagePixels.shape[1]):
-            for y in range(imagePixels.shape[0]):
+    for x in range(imagePixels.shape[0]):
+        for y in range(imagePixels.shape[1]):
+            for z in range(imagePixels.shape[2]):
                 newCol = x + 2.0*math.sin(y/32.0) - 2.0*math.cos(z/16.0)
-                newRow = y + 8.0*math.sin(x/32.0) - 4.0*math.sin(z/8.0);
-                newDepth = z + 2.0*math.sin(x/16.0) - 4.0*math.cos(y/16.0);
-                if newCol <= 0 or newCol >= imagePixels.shape[1]:
+                newRow = y + 8.0*math.sin(x/32.0) - 4.0*math.sin(z/8.0)
+                newDepth = z + 2.0*math.sin(x/16.0) - 4.0*math.cos(y/16.0)
+                if newCol <= 0 or newCol >= imagePixels.shape[0]:
                     continue
-                if newRow <= 0 or newRow >= imagePixels.shape[0]:
+                if newRow <= 0 or newRow >= imagePixels.shape[1]:
                     continue
                 if newDepth <= 0 or newDepth >= imagePixels.shape[2]:
                     continue
                 newPixel = trilinear(imagePixels, newCol, newRow, newDepth)
-                deformedPixels.itemset((y,x,z), newPixel)
+                deformedPixels.itemset((x,y,z), newPixel)
 
-    affine = np.diag([1, 2, 3, 1])
+    affine = np.diag([1, 1, 1, 1])
     array_img = nibabel.Nifti1Image(deformedPixels, affine)
     return array_img
 
@@ -110,27 +110,27 @@ def getPixel3D(pixels, x, y, z):
         elif z >= d or z < 0:
             return 0.0
         else:
-            return pixels.item(y, x, z)
+            return pixels.item(x, y, z)
 
 def generateGridImage3D(size, step):
     shape = (size, size, size)
     array_data = np.full(shape, 255, np.uint8)
-    affine = np.diag([1, 2, 3, 1])
+    affine = np.diag([1, 1, 1, 1])
 
     for y in range(step, size, step):
         for x in range (0, size):
             for z in range (0, size):
-                array_data.itemset((y, x, z), 0)
+                array_data.itemset((x, y, z), 0)
 
     for x in range(step, size, step):
         for y in range(0, size):
             for z in range (0, size):
-                array_data.itemset((y, x, z), 0)
+                array_data.itemset((x, y, z), 0)
 
     for z in range(step, size, step):
         for x in range(0, size):
             for y in range (0, size):
-                array_data.itemset((y, x, z), 0)
+                array_data.itemset((x, y, z), 0)
 
     array_img = nibabel.Nifti1Image(array_data, affine)
     return array_img
