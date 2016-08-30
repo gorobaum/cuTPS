@@ -22,7 +22,7 @@ __device__ short cudaGetPixel(int x, int y, int z, short* image, int width, int 
   if (x > width-1 || x < 0) return 0;
   if (y > height-1 || y < 0) return 0;
   if (z > slices-1 || z < 0) return 0;
-  return image[z*height*width+x*height+y];
+  return image[z*height*width+y*width+x];
 }
 
 // Kernel definition
@@ -80,7 +80,7 @@ __global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX,
   if (x <= width-1 && x >= 0)
     if (y <= height-1 && y >= 0)
       if (z <= slices-1 && z >= 0)
-        cudaRegImage[z*height*width+x*height+y] = cudaTrilinearInterpolation(newX, newY, newZ, cudaImage, width, height, slices);
+        cudaRegImage[z*height*width+y*width+x] = cudaTrilinearInterpolation(newX, newY, newZ, cudaImage, width, height, slices);
 }
 
 // Kernel definition

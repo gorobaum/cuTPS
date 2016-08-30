@@ -12,7 +12,7 @@ tps::Image tps::OPCVImageHandler::loadImageData(std::string filename) {
 
   for (int col = 0; col < dimensions[0]; col++)
     for (int row = 0; row < dimensions[1]; row++)
-      vecImage[col*dimensions[1]+row] = cvTarImg.at<uchar>(row, col);
+      vecImage[row*dimensions[0]+col] = cvTarImg.at<uchar>(row, col);
 
   tps::Image image(vecImage, dimensions);
 
