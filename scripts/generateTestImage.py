@@ -80,12 +80,19 @@ def generateKeypoints3D(imagePixels, percentage):
     deformedPixels = np.zeros(imagePixels.shape, np.uint8)
     deformedPixels.fill(0)
 
-    for x in range(imagePixels.shape[0]):
-        for y in range(imagePixels.shape[1]):
-            for z in range(imagePixels.shape[2]):
+    xStep = math.floor(imagePixels.shape[0]*percentage)
+    yStep = math.floor(imagePixels.shape[1]*percentage)
+    zStep = math.floor(imagePixels.shape[2]*percentage)
+
+    for x in range(0, imagePixels.shape[0], xStep):
+        for y in range(0, imagePixels.shape[1], yStep):
+            for z in range(0, imagePixels.shape[2], zStep):
                 newCol = x - 2.0*math.sin(y/32.0) + 2.0*math.cos(z/16.0)
                 newRow = y - 8.0*math.sin(x/32.0) + 4.0*math.sin(z/8.0)
                 newDepth = z - 2.0*math.sin(x/16.0) + 4.0*math.cos(y/16.0)
+
+                print(newCol, newRow, newDepth)
+
                 if newCol <= 0 or newCol >= imagePixels.shape[0]:
                     continue
                 if newRow <= 0 or newRow >= imagePixels.shape[1]:
@@ -168,7 +175,7 @@ if (dimension == 2):
 else:
     staticImage = generateGridImage3D(gridSize, step)
     movingImage = deformSinusiodal3D(staticImage.get_data())
-    keypointImage = generateKeypoints3D(staticImage.get_data())
+    keypointImage = generateKeypoints3D(staticImage.get_data(), 0.10)
     nibabel.save(staticImage, sys.argv[4])
     nibabel.save(movingImage, sys.argv[5])
     nibabel.save(keypointImage, "keypoint.nii.gz")

@@ -42,7 +42,7 @@ void Controller::exec() {
             if ((lastInstaceLoaded_ - lastInstanceExecuted_) > MAXRUNNINGINSTANCES) break;
         }
 
-        runLoadedInstances();
+        // runLoadedInstances();
     }
     std::cout << "==========================================" << std::endl;
 }
