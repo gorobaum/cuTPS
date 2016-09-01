@@ -23,25 +23,25 @@ void tps::FeatureGenerator::run() {
 
 void tps::FeatureGenerator::createReferenceImageFeatures() {
     std::vector<int> dimensions = referenceImage_.getDimensions();
-    for (int x = 0; x < dimensions[0]; x+=xStep)
+    for (int z = 0; z < dimensions[2]; z+=zStep)
         for (int y = 0; y < dimensions[1]; y+=yStep)
-            for (int z = 0; z < dimensions[2]; z+=zStep) {
+            for (int x = 0; x < dimensions[0]; x+=xStep) {
                 std::vector<float> newCP;
                 newCP.push_back(x);
                 newCP.push_back(y);
                 newCP.push_back(z);
                 referenceKeypoints.push_back(newCP);
-      }
+            }
 }
 
 void tps::FeatureGenerator::createTargetImageFeatures() {
     for (int pos = 0; pos < referenceKeypoints.size(); pos++) {
         std::vector<float> referenceCP = referenceKeypoints[pos];
+        // std::cout << referenceCP[0] << " " << referenceCP[1] << " " << referenceCP[2] << std::endl;
         std::vector<float> newPoint = applySinDeformationTo(referenceCP[0], referenceCP[1], referenceCP[2]);
+        // std::cout << newPoint[0] << " " << newPoint[1] << " " << newPoint[2] << std::endl;
         targetKeypoints.push_back(newPoint);
     }
-    std::cout << "referenceKeypoints.size() = " << referenceKeypoints.size() << std::endl;
-    std::cout << "targetKeypoints.size() = " << targetKeypoints.size() << std::endl;
 }
 
 std::vector<float> tps::FeatureGenerator::applySinDeformationTo(float x, float y, float z) {

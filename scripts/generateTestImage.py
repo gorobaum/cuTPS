@@ -54,21 +54,16 @@ def generateGridImage(size, step):
     return image
 
 def deformSinusiodal3D(imagePixels):
-    deformedPixels = np.zeros(imagePixels.shape, np.uint8)
+    deformedPixels = np.zeros(imagePixels.shape, np.int16)
     deformedPixels.fill(0)
 
     for x in range(imagePixels.shape[0]):
         for y in range(imagePixels.shape[1]):
             for z in range(imagePixels.shape[2]):
-                newCol = x + 2.0*math.sin(y/32.0) - 2.0*math.cos(z/16.0)
-                newRow = y + 8.0*math.sin(x/32.0) - 4.0*math.sin(z/8.0)
-                newDepth = z + 2.0*math.sin(x/16.0) - 4.0*math.cos(y/16.0)
-                if newCol <= 0 or newCol >= imagePixels.shape[0]:
-                    continue
-                if newRow <= 0 or newRow >= imagePixels.shape[1]:
-                    continue
-                if newDepth <= 0 or newDepth >= imagePixels.shape[2]:
-                    continue
+                newCol = x + 2.0*math.sin(y/8.0) - 2.0*math.cos(z/16.0)
+                newRow = y + 4.0*math.sin(x/8.0) - 2.0*math.sin(z/8.0)
+                newDepth = z + 2.0*math.sin(x/16.0) - 4.0*math.cos(y/8.0)
+
                 newPixel = trilinear(imagePixels, newCol, newRow, newDepth)
                 deformedPixels.itemset((x,y,z), newPixel)
 
@@ -77,7 +72,7 @@ def deformSinusiodal3D(imagePixels):
     return array_img
 
 def generateKeypoints3D(imagePixels, percentage):
-    deformedPixels = np.zeros(imagePixels.shape, np.uint8)
+    deformedPixels = np.zeros(imagePixels.shape, np.int16)
     deformedPixels.fill(0)
 
     xStep = math.floor(imagePixels.shape[0]/(imagePixels.shape[0]*percentage))
@@ -91,14 +86,6 @@ def generateKeypoints3D(imagePixels, percentage):
                 newRow = y - 8.0*math.sin(x/32.0) + 4.0*math.sin(z/8.0)
                 newDepth = z - 2.0*math.sin(x/16.0) + 4.0*math.cos(y/16.0)
 
-                print(newCol, newRow, newDepth)
-
-                if newCol <= 0 or newCol >= imagePixels.shape[0]:
-                    continue
-                if newRow <= 0 or newRow >= imagePixels.shape[1]:
-                    continue
-                if newDepth <= 0 or newDepth >= imagePixels.shape[2]:
-                    continue
                 deformedPixels.itemset((newCol,newRow,newDepth), 255)
 
     print(xStep, yStep, zStep)
@@ -131,8 +118,8 @@ def trilinear(imagePixels, x, y, z):
     return newValue
 
 def getPixel3D(pixels, x, y, z):
-        h = pixels.shape[0]
-        w = pixels.shape[1]
+        w = pixels.shape[0]
+        h = pixels.shape[1]
         d = pixels.shape[2]
         if x >= w or x < 0:
             return 0.0
@@ -166,15 +153,23 @@ def generateGridImage3D(size, step):
     array_img = nibabel.Nifti1Image(array_data, affine)
     return array_img
 
-gridSize = int(sys.argv[1])
-step = int(sys.argv[2])
-dimension = int(sys.argv[3])
-if (dimension == 2):
+rolet = sys.argv[1]
+if (rolet == "-d"):
+    staticImage = nibabel.load(sys.argv[2])
+    movingImage = deformSinusiodal3D(staticImage.get_data())
+    nibabel.save(movingImage, sys.argv[3])
+elif (dimension == 2):
+    gridSize = int(rolet)
+    step = int(sys.argv[2])
+    dimension = int(sys.argv[3])
     staticImage = generateGridImage(gridSize, step)
     movingImage = deformSinusiodal(staticImage)
     cv2.imwrite(sys.argv[4], staticImage)
     cv2.imwrite(sys.argv[5], movingImage)
 else:
+    gridSize = int(rolet)
+    step = int(sys.argv[2])
+    dimension = int(sys.argv[3])
     staticImage = generateGridImage3D(gridSize, step)
     movingImage = deformSinusiodal3D(staticImage.get_data())
     keypointImage = generateKeypoints3D(staticImage.get_data(), 1)
