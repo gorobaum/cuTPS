@@ -18,7 +18,6 @@ itk::ImageIOBase::Pointer tps::ITKImageHandler::getImageIO(std::string input) {
 }
 
 tps::Image tps::ITKImageHandler::loadImageData(std::string filename) {
-
   std::vector<int> dimensions;
   itk::ImageIOBase::Pointer imageIO = getImageIO(filename);
 
@@ -27,19 +26,7 @@ tps::Image tps::ITKImageHandler::loadImageData(std::string filename) {
   reader->Update();
   ImageType::Pointer image = reader->GetOutput();
 
-  ImageType::RegionType region;
-  ImageType::IndexType start;
-  ImageType::SizeType size;
-
-  for (int i = 0; i < 3; ++i){
-    start[i] = 0;
-    size[i] = imageIO->GetDimensions(i);
-  }
-
-  region.SetSize(size);
-  region.SetIndex(start);
-
-  itk::ImageRegionIterator<ImageType> imageIterator(image,region);
+  itk::ImageRegionIterator<ImageType> imageIterator(image, image->GetRequestedRegion());
 
   for (int i = 0; i < 3; ++i){
     dimensions.push_back(imageIO->GetDimensions(i));
@@ -47,13 +34,15 @@ tps::Image tps::ITKImageHandler::loadImageData(std::string filename) {
 
   short* vecImage = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
 
+  tps::Image newImage(dimensions);
+
   while(!imageIterator.IsAtEnd()){
     ImageType::IndexType index = imageIterator.GetIndex();
-    vecImage[index[1]+index[0]*dimensions[1]+index[2]*dimensions[1]*dimensions[0]] = imageIterator.Value();
+    newImage.changePixelAt(index[0], index[1], index[2], imageIterator.Get());
     ++imageIterator;
   }
 
-  return tps::Image(vecImage, dimensions);
+  return newImage;
 }
 
 void tps::ITKImageHandler::saveImageData(tps::Image resultImage, std::string filename) {
