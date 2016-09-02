@@ -53,7 +53,7 @@ def generateGridImage(size, step):
 
     return image
 
-def deformSinusiodal3D(imagePixels):
+def deformSinusiodal3D(imagePixels, affine):
     deformedPixels = np.zeros(imagePixels.shape, np.int16)
     deformedPixels.fill(0)
 
@@ -67,7 +67,6 @@ def deformSinusiodal3D(imagePixels):
                 newPixel = trilinear(imagePixels, newCol, newRow, newDepth)
                 deformedPixels.itemset((x,y,z), newPixel)
 
-    affine = np.diag([1, 1, 1, 1])
     array_img = nibabel.Nifti1Image(deformedPixels, affine)
     return array_img
 
@@ -85,6 +84,13 @@ def generateKeypoints3D(imagePixels, percentage):
                 newCol = x - 2.0*math.sin(y/32.0) + 2.0*math.cos(z/16.0)
                 newRow = y - 8.0*math.sin(x/32.0) + 4.0*math.sin(z/8.0)
                 newDepth = z - 2.0*math.sin(x/16.0) + 4.0*math.cos(y/16.0)
+
+                if newCol < 0 or newCol >= imagePixels.shape[0]:
+                    continue
+                if newRow < 0 or newRow >= imagePixels.shape[1]:
+                    continue
+                if newDepth < 0 or newDepth >= imagePixels.shape[2]:
+                    continue
 
                 deformedPixels.itemset((newCol,newRow,newDepth), 255)
 
@@ -156,23 +162,24 @@ def generateGridImage3D(size, step):
 rolet = sys.argv[1]
 if (rolet == "-d"):
     staticImage = nibabel.load(sys.argv[2])
-    movingImage = deformSinusiodal3D(staticImage.get_data())
+    movingImage = deformSinusiodal3D(staticImage.get_data(), staticImage.affine)
     nibabel.save(movingImage, sys.argv[3])
-elif (dimension == 2):
-    gridSize = int(rolet)
-    step = int(sys.argv[2])
-    dimension = int(sys.argv[3])
-    staticImage = generateGridImage(gridSize, step)
-    movingImage = deformSinusiodal(staticImage)
-    cv2.imwrite(sys.argv[4], staticImage)
-    cv2.imwrite(sys.argv[5], movingImage)
 else:
     gridSize = int(rolet)
     step = int(sys.argv[2])
     dimension = int(sys.argv[3])
-    staticImage = generateGridImage3D(gridSize, step)
-    movingImage = deformSinusiodal3D(staticImage.get_data())
-    keypointImage = generateKeypoints3D(staticImage.get_data(), 1)
-    nibabel.save(staticImage, sys.argv[4])
-    nibabel.save(movingImage, sys.argv[5])
-    nibabel.save(keypointImage, "keypoint.nii.gz")
+    if (dimension == 2):
+        staticImage = generateGridImage(gridSize, step)
+        movingImage = deformSinusiodal(staticImage)
+        cv2.imwrite(sys.argv[4], staticImage)
+        cv2.imwrite(sys.argv[5], movingImage)
+    else:
+        gridSize = int(rolet)
+        step = int(sys.argv[2])
+        dimension = int(sys.argv[3])
+        staticImage = generateGridImage3D(gridSize, step)
+        movingImage = deformSinusiodal3D(staticImage.get_data(), staticImage.affine)
+        keypointImage = generateKeypoints3D(staticImage.get_data(), 1)
+        nibabel.save(staticImage, sys.argv[4])
+        nibabel.save(movingImage, sys.argv[5])
+        nibabel.save(keypointImage, "keypoint.nii.gz")
