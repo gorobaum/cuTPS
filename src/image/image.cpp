@@ -1,8 +1,11 @@
 #include "image.h"
 
+#include <iostream>
+
 void tps::Image::changePixelAt(int x, int y, int z, short value) {
-  if (x >= 0 && x < dimensions_[0]-1 && y >= 0 && y < dimensions_[1]-1 && z >= 0 && z <= dimensions_[2]-1)
-    image[x+y*dimensions_[0]+z*dimensions_[0]*dimensions_[1]] = value;
+  if (x >= 0 && x < dimensions_[0]-1 && y >= 0 && y < dimensions_[1]-1 && z >= 0 && z <= dimensions_[2]-1) {
+      image[x+y*dimensions_[0]+z*dimensions_[0]*dimensions_[1]] = value;
+  }
 }
 
 std::vector<short> tps::Image::getMinMax() {

@@ -191,7 +191,7 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
     threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize, twoDim);
   } else {
     threadsPerBlock.x = 16;
-    threadsPerBlock.y = 16;
+    threadsPerBlock.y = 8;
     if (twoDim) {
       threadsPerBlock.z = 1;
     } else {

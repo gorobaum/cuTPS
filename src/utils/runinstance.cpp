@@ -141,13 +141,12 @@ void RunInstance::solveLinearSystemWithArmadillo() {
 void RunInstance::generateKeypointImage() {
     Image result(referenceImage_.getDimensions());
 
-    for (int i = 0; i < targetKeypoints_.size(); i++)
-        for (int j = 0; j < targetKeypoints_[i].size(); j++) {
-            int x = std::ceil(targetKeypoints_[i][0]);
-            int y = std::ceil(targetKeypoints_[i][1]);
-            int z = std::ceil(targetKeypoints_[i][2]);
-            result.changePixelAt(x, y, z, 255);
-        }
+    for (int i = 0; i < targetKeypoints_.size(); i++) {
+        int x = std::ceil(targetKeypoints_[i][0]);
+        int y = std::ceil(targetKeypoints_[i][1]);
+        int z = std::ceil(targetKeypoints_[i][2]);
+        result.changePixelAt(x, y, z, 255);
+    }
     imageHandler_->saveImageData(result, "keypoints");
 }
 
