@@ -145,7 +145,10 @@ void RunInstance::generateKeypointImage() {
         int x = std::ceil(targetKeypoints_[i][0]);
         int y = std::ceil(targetKeypoints_[i][1]);
         int z = std::ceil(targetKeypoints_[i][2]);
-        result.changePixelAt(x, y, z, 255);
+        for (int i = x - 2; i < x + 2; i++)
+            for (int j = y - 2; j < y + 2; j++)
+                for (int k = z - 2; k < z + 2; k++)
+                    result.changePixelAt(i, j, k, 255);
     }
     imageHandler_->saveImageData(result, "keypoints");
 }
