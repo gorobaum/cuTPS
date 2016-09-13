@@ -14,9 +14,6 @@ void tps::FeatureGenerator::run() {
   zStep = dimensions[2]/(dimensions[2]*percentage_);
   if (referenceImage_.isTwoDimensional()) zStep = 0.0;
 
-  // std::cout << "xStep = " << xStep << std::endl;
-  // std::cout << "yStep = " << yStep << std::endl;
-  // std::cout << "zStep = " << zStep << std::endl;
   createReferenceImageFeatures();
   createTargetImageFeatures();
 }
@@ -37,9 +34,7 @@ void tps::FeatureGenerator::createReferenceImageFeatures() {
 void tps::FeatureGenerator::createTargetImageFeatures() {
     for (int pos = 0; pos < referenceKeypoints.size(); pos++) {
         std::vector<float> referenceCP = referenceKeypoints[pos];
-        // std::cout << referenceCP[0] << " " << referenceCP[1] << " " << referenceCP[2] << std::endl;
         std::vector<float> newPoint = applySinDeformationTo(referenceCP[0], referenceCP[1], referenceCP[2]);
-        // std::cout << newPoint[0] << " " << newPoint[1] << " " << newPoint[2] << std::endl;
         targetKeypoints.push_back(newPoint);
     }
 }

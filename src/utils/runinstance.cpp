@@ -150,7 +150,8 @@ void RunInstance::generateKeypointImage() {
                 for (int k = z - 2; k < z + 2; k++)
                     result.changePixelAt(i, j, k, 255);
     }
-    imageHandler_->saveImageData(result, "keypoints");
+    std::string keypointImage = instanceConfiguration_.getString("keypointImage");
+    imageHandler_->saveImageData(result, keypointImage);
 }
 
 double RunInstance::getEstimateGpuMemory() {

@@ -50,7 +50,6 @@ void tps::CPLinearSystems::createBs3D() {
   bx = std::vector<float>(systemDimension, 0.0);
   by = std::vector<float>(systemDimension, 0.0);
   bz = std::vector<float>(systemDimension, 0.0);
-  std::cout << "targetKeypoints_.size() = " << targetKeypoints_.size() << std::endl;
   for (int j = Size3D, i = 0; j < systemDimension; i++, j++) {
     bx[j] = targetKeypoints_[i][0];
     by[j] = targetKeypoints_[i][1];
