@@ -97,18 +97,17 @@ __global__ void tpsCudaWithText(cudaTextureObject_t textObj, short* cudaRegImage
 
   for (int i = 0; i < numOfKeys; i++) {
     float r = (x-keyX[i])*(x-keyX[i]) + (y-keyY[i])*(y-keyY[i]) + (z-keyZ[i])*(z-keyZ[i]);
-    float logR = r*log(r);
     if (r != 0.0) {
-      newX += logR * solutionX[i+4];
-      newY += logR * solutionY[i+4];
-      newZ += logR * solutionZ[i+4];
+      newX += r*log(r) * solutionX[i+4];
+      newY += r*log(r) * solutionY[i+4];
+      newZ += r*log(r) * solutionZ[i+4];
     }
   }
 
   if (x <= width-1 && x >= 0)
     if (y <= height-1 && y >= 0)
       if (z <= slices-1 && z >= 0)
-        cudaRegImage[x*slices*height+y*slices+z] = (short)tex3D<float>(textObj, newX, newY, newZ);
+        cudaRegImage[z*width*height+y*width+x] = (short)tex3D<float>(textObj, newX, newY, newZ);
 }
 
 void startTimeRecord(cudaEvent_t *start, cudaEvent_t *stop) {
@@ -190,7 +189,7 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
     int maxBlockSize = getBlockSize();
     threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize, twoDim);
   } else {
-    threadsPerBlock.x = 16;
+    threadsPerBlock.x = 8;
     threadsPerBlock.y = 8;
     if (twoDim) {
       threadsPerBlock.z = 1;
@@ -233,8 +232,8 @@ short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int n
     int maxBlockSize = getBlockSize();
     threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize, twoDim);
   } else {
-    threadsPerBlock.x = 16;
-    threadsPerBlock.y = 16;
+    threadsPerBlock.x = 8;
+    threadsPerBlock.y = 8;
     if (twoDim) {
       threadsPerBlock.z = 1;
     } else {
