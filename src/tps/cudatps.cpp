@@ -16,10 +16,11 @@ tps::Image tps::CudaTPS::run() {
     bool occupancy = GlobalConfiguration::getInstance().getBoolean("calculateOccupancy");
     bool twoDim = targetImage_.isTwoDimensional();
     bool texture = GlobalConfiguration::getInstance().getBoolean("imageTexture");
+    int blockSize = GlobalConfiguration::getInstance().getInt("blockSize");
     if (texture) {
-        regImage = runTPSCUDAWithText(cm_, dimensions_, referenceKeypoints_.size(), occupancy, twoDim);
+        regImage = runTPSCUDAWithText(cm_, dimensions_, referenceKeypoints_.size(), occupancy, twoDim, blockSize);
     } else {
-        regImage = runTPSCUDA(cm_, dimensions_, referenceKeypoints_.size(), occupancy, twoDim);
+        regImage = runTPSCUDA(cm_, dimensions_, referenceKeypoints_.size(), occupancy, twoDim, blockSize);
     }
 
     registredImage.setPixelVector(regImage);

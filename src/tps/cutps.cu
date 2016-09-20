@@ -126,7 +126,7 @@ void showExecutionTime(cudaEvent_t *start, cudaEvent_t *stop, std::string output
   std::cout << output << elapsedTime << " ms\n";
 }
 
-int getBlockSize() {
+int getBlockSize(int maxBlockSize) {
   int maxOccupancyBlockSize = 0;
   float maxOccupancy = 0.0;
   int device;
@@ -134,7 +134,7 @@ int getBlockSize() {
   cudaGetDevice(&device);
   cudaGetDeviceProperties(&prop, device);
 
-  for (int blockSize = 32; blockSize <= 256; blockSize += 32) {
+  for (int blockSize = 32; blockSize <= maxBlockSize; blockSize += 32) {
     int numBlocks;        // Occupancy in terms of active blocks
 
     cudaOccupancyMaxActiveBlocksPerMultiprocessor(
@@ -165,13 +165,12 @@ dim3 calculateBestThreadsPerBlock(int blockSize, bool twoDim) {
     imageDimension = 3;
   }
 
-  for (int i = 0; divisor > 1; i++) {
+  for (int i = 0; divisor > 1;) {
     if (blockSize%divisor == 0) {
       threadsPerDim[i%imageDimension] *= divisor;
       blockSize /= divisor;
       i++;
-    }
-    else {
+    } else {
       divisor /= 2;
     }
   }
@@ -183,11 +182,11 @@ dim3 calculateBestThreadsPerBlock(int blockSize, bool twoDim) {
   return threadsPerBlock;
 }
 
-short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim) {
+short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim, int blockSize) {
   dim3 threadsPerBlock;
 
   if (occupancy) {
-    int maxBlockSize = getBlockSize();
+    int maxBlockSize = getBlockSize(blockSize);
     threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize, twoDim);
   } else {
     threadsPerBlock.x = 8;
@@ -226,11 +225,11 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
   return regImage;
 }
 
-short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim) {
+short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim, int blockSize) {
   dim3 threadsPerBlock;
 
   if (occupancy) {
-    int maxBlockSize = getBlockSize();
+    int maxBlockSize = getBlockSize(blockSize);
     threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize, twoDim);
   } else {
     threadsPerBlock.x = 8;
