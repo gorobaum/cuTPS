@@ -76,6 +76,7 @@ void RunInstance::executeTps() {
     }
 
     std::string resultImage = instanceConfiguration_.getString("resultImage");
+    resultImage += GlobalConfiguration::getInstance().getString("resultImageMod");
     imageHandler_->saveImageData(result, resultImage);
     isDone_ = true;
     if (GlobalConfiguration::getInstance().isCuda())

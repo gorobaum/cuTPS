@@ -169,6 +169,7 @@ dim3 calculateBestThreadsPerBlock(int blockSize, bool twoDim) {
     if (blockSize%divisor == 0) {
       threadsPerDim[i%imageDimension] *= divisor;
       blockSize /= divisor;
+      i++;
     }
     else {
       divisor /= 2;
