@@ -21,7 +21,6 @@ void Controller::exec() {
     GlobalConfiguration::getInstance().printConfigs();
 
     while (lastInstaceLoaded_ < runInstances_.size()) {
-
         for (lastInstaceLoaded_; lastInstaceLoaded_ < runInstances_.size(); lastInstaceLoaded_++) {
             runInstances_[lastInstaceLoaded_].loadData();
             if (isCuda) {
@@ -119,15 +118,15 @@ void Controller::readConfigurationFile(std::string masterConfigFilePath) {
 }
 
 ImageHandler* Controller::getCorrectImageHandler(std::string referenceImagePath) {
-    std::size_t pos = referenceImagePath.find('.');
+    std::size_t pos = referenceImagePath.rfind('.');
     std::string extension = referenceImagePath.substr(pos);
 
     tps::ImageHandler *imageHandler;
-
-    if (extension.compare(".nii.gz") == 0)
+    if ((extension.compare(".nii") == 0) || (extension.compare(".gz") == 0)) {
         imageHandler = new tps::ITKImageHandler();
-    else
+    } else {
         imageHandler = new tps::OPCVImageHandler();
+    }
 
     return imageHandler;
 }

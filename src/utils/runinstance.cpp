@@ -22,9 +22,9 @@ void RunInstance::loadData() {
 }
 
 void RunInstance::loadKeypoints() {
-    if (instanceConfiguration_.isCallFeatureGenerator())
+    if (instanceConfiguration_.isCallFeatureGenerator()) {
         generateKeypoints();
-    else {
+    } else {
         targetKeypoints_ = instanceConfiguration_.getFloatVector("targetKeypoints");
         referenceKeypoints_ = instanceConfiguration_.getFloatVector("referenceKeypoints");
     }

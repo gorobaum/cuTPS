@@ -13,7 +13,6 @@ void tps::FeatureGenerator::run() {
   yStep = dimensions[1]/(dimensions[1]*percentage_);
   zStep = dimensions[2]/(dimensions[2]*percentage_);
   if (referenceImage_.isTwoDimensional()) zStep = 0.0;
-
   createReferenceImageFeatures();
   createTargetImageFeatures();
 }

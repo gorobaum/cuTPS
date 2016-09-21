@@ -11,7 +11,7 @@ include(${ITK_USE_FILE})
 
 include_directories(src "${ARMADILLO_INCLUDE_DIRS}")
 
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xptxas -v -arch=sm_30 -Xcompiler -std=c++98")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xptxas -v -Xcompiler -std=c++98")
 
 cuda_add_executable(tps
   src/main.cpp
@@ -46,9 +46,11 @@ target_link_libraries(tps
     ${ITK_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${OpenCV_LIBS}
-    /opt/cuda/lib64/libcusolver.so
+    ${CUDA_cusolver_LIBRARY}
     ${CUDA_CUBLAS_LIBRARIES}
     ${ARMADILLO_LIBRARIES})
+
+message(STATUS ${CUDA_cusolver_LIBRARY})
 
 add_custom_target (
 	cleanResults
