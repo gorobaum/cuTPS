@@ -1,0 +1,13 @@
+referenceImage:/home/goroba/reps/newTPS/images/bio-Ref.nii.gz
+linearSystemSolver:cuda
+tps:cuda
+calculateOccupancy:true
+parallelExecution:true
+numberOfThreads:4
+blockSize:512
+imageTexture:true
+resultImageMod:allOn
+/home/goroba/reps/newTPS/3dconfigurations/config3d1.tps
+/home/goroba/reps/newTPS/3dconfigurations/config3d2.tps
+/home/goroba/reps/newTPS/3dconfigurations/config3d3.tps
+/home/goroba/reps/newTPS/3dconfigurations/config3d4.tps
