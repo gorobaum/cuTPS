@@ -1,0 +1,13 @@
+referenceImage:../images/bio-Ref.nii.gz
+linearSystemSolver:cuda
+tps:cuda
+calculateOccupancy:true
+parallelExecution:true
+imageTexture:false
+numberOfThreads:4
+blockSize:512
+resultImageMod:occAndPll
+../3dconfigurations/config3d1.tps
+../3dconfigurations/config3d2.tps
+../3dconfigurations/config3d3.tps
+../3dconfigurations/config3d4.tps
