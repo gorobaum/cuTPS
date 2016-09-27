@@ -1,4 +1,4 @@
-referenceImage:/home/goroba/reps/newTPS/images/bio-Ref.nii.gz
+referenceImage:../images/bio-Ref.nii.gz
 linearSystemSolver:cuda
 tps:cuda
 calculateOccupancy:false
@@ -7,7 +7,7 @@ numberOfThreads:4
 blockSize:512
 imageTexture:false
 resultImageMod:parallel
-/home/goroba/reps/newTPS/3dconfigurations/config3d1.tps
-/home/goroba/reps/newTPS/3dconfigurations/config3d2.tps
-/home/goroba/reps/newTPS/3dconfigurations/config3d3.tps
-/home/goroba/reps/newTPS/3dconfigurations/config3d4.tps
+../3dconfigurations/config3d1.tps
+../3dconfigurations/config3d2.tps
+../3dconfigurations/config3d3.tps
+../3dconfigurations/config3d4.tps

@@ -5,7 +5,7 @@ calculateOccupancy:true
 parallelExecution:true
 imageTexture:false
 numberOfThreads:4
-blockSize:512
+blockSize:2048
 resultImageMod:occAndPll
 ../3dconfigurations/config3d1.tps
 ../3dconfigurations/config3d2.tps
