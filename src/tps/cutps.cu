@@ -1,5 +1,6 @@
-#include <iostream>
 #include <cassert>
+#include <sstream>
+#include <iostream>
 
 #include "cuda.h"
 #include "cuda_runtime.h"
@@ -221,7 +222,10 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
   checkCuda(cudaDeviceSynchronize());
   checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
 
-  showExecutionTime(&start, &stop, "callKernel execution time = ");
+  std::ostringstream oss;
+  oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
+
+  showExecutionTime(&start, &stop, oss.str());
   return regImage;
 }
 
@@ -264,6 +268,9 @@ short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int n
   checkCuda(cudaDeviceSynchronize());
   checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
 
-  showExecutionTime(&start, &stop, "callKernel execution time = ");
+  std::ostringstream oss;
+  oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
+
+  showExecutionTime(&start, &stop, oss.str());
   return regImage;
 }
