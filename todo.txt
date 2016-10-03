@@ -16,3 +16,8 @@ Otimização:
 - Utilizar flags para diminuir a precisão e aumentar o desempenho da GPU ( Ex: -use_fast_math )
 - Trabalhar com precisão simples
 - Transferir todos os dados juntos em um grande bloco
+
+
+
+
+- Passar a solução dos sistemas para shared memory

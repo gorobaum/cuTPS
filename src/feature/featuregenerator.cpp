@@ -20,20 +20,25 @@ void tps::FeatureGenerator::run() {
 void tps::FeatureGenerator::createReferenceImageFeatures() {
     std::vector<int> dimensions = referenceImage_.getDimensions();
     for (int z = 0; z < dimensions[2]; z+=zStep)
-        for (int y = 0; y < dimensions[1]; y+=yStep)
+        for (int y = 0; y < dimensions[1]; y+=yStep) {
             for (int x = 0; x < dimensions[0]; x+=xStep) {
                 std::vector<float> newCP;
                 newCP.push_back(x);
                 newCP.push_back(y);
                 newCP.push_back(z);
                 referenceKeypoints.push_back(newCP);
+                // std::cout << x << "," << y << "," << z << ";";
             }
+            // std::cout << std::endl;
+        }
 }
 
 void tps::FeatureGenerator::createTargetImageFeatures() {
     for (int pos = 0; pos < referenceKeypoints.size(); pos++) {
         std::vector<float> referenceCP = referenceKeypoints[pos];
         std::vector<float> newPoint = applySinDeformationTo(referenceCP[0], referenceCP[1], referenceCP[2]);
+        // std::cout << newPoint[0] << "," << newPoint[1] << "," << newPoint[2] << ";";
+        // if (pos%200 == 0) std::cout << std::endl;
         targetKeypoints.push_back(newPoint);
     }
 }

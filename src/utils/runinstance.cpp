@@ -85,7 +85,7 @@ void RunInstance::executeTps() {
 
 void RunInstance::printInfo() {
     std::cout << "==========================================" << std::endl;
-    instanceConfiguration_.printConfigs();
+    // instanceConfiguration_.printConfigs();
     std::cout << "------------------------------------------" << std::endl;
 }
 

@@ -18,7 +18,7 @@ void Controller::exec() {
     double totalGpuMemory = CudaMemory::getGpuMemory() * 0.9;
     std::vector<RunInstance> loadedInstances;
 
-    GlobalConfiguration::getInstance().printConfigs();
+    // GlobalConfiguration::getInstance().printConfigs();
 
     while (lastInstaceLoaded_ < runInstances_.size()) {
         for (lastInstaceLoaded_; lastInstaceLoaded_ < runInstances_.size(); lastInstaceLoaded_++) {
