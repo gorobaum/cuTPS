@@ -4,6 +4,7 @@ tps:cuda
 calculateOccupancy:false
 parallelExecution:false
 numberOfThreads:4
+cpuInterpolation:false
 blockSize:512
 imageTexture:true
 resultImageMod:texture

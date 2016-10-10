@@ -4,6 +4,7 @@ tps:parallel
 calculateOccupancy:false
 parallelExecution:false
 imageTexture:false
+cpuInterpolation:false
 numberOfThreads:4
 blockSize:512
 resultImageMod:cpu

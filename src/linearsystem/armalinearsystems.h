@@ -10,7 +10,7 @@ class ArmaLinearSystems : public CPLinearSystems {
 using CPLinearSystems::CPLinearSystems;
 public:
   void solveLinearSystems();
-  
+
 private:
   void transferMatrixA();
   void transferBs();

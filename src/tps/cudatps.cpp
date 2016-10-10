@@ -16,9 +16,12 @@ tps::Image tps::CudaTPS::run() {
     bool occupancy = GlobalConfiguration::getInstance().getBoolean("calculateOccupancy");
     bool twoDim = targetImage_.isTwoDimensional();
     bool texture = GlobalConfiguration::getInstance().getBoolean("imageTexture");
+    bool cpuInterpolation = GlobalConfiguration::getInstance().getBoolean("cpuInterpolation");
     int blockSize = GlobalConfiguration::getInstance().getInt("blockSize");
     if (texture) {
         regImage = runTPSCUDAWithText(cm_, dimensions_, referenceKeypoints_.size(), occupancy, twoDim, blockSize);
+    } else if (cpuInterpolation){
+        regImage = runTPSCUDAWithoutInterpolation(cm_, targetImage_.getPixelVector(), dimensions_, referenceKeypoints_.size(), occupancy, twoDim, blockSize);
     } else {
         regImage = runTPSCUDA(cm_, dimensions_, referenceKeypoints_.size(), occupancy, twoDim, blockSize);
     }

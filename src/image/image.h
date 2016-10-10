@@ -23,6 +23,7 @@ public:
 				image[i] = 0;
 	}
     bool isTwoDimensional();
+    int numberOfDimension();
     short* getPixelVector();
     float* getFloatPixelVector();
 	std::vector<short> getMinMax();

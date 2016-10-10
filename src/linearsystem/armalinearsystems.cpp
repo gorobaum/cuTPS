@@ -24,7 +24,7 @@ void tps::ArmaLinearSystems::solveLinearSystems() {
     adaptSolutionTo3D();
 
   double time = timer.toc();
-  std::cout << "Arma solver execution time: " << time << std::endl;
+  std::cout << "Arma solver execution time: " << time << "s" << std::endl;
 }
 
 std::vector<float> tps::ArmaLinearSystems::solveLinearSystem(arma::vec b) {

@@ -2,6 +2,8 @@
 #include <sstream>
 #include <iostream>
 
+#include <armadillo>
+
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include "cuda_occupancy.h"
@@ -111,6 +113,73 @@ __global__ void tpsCudaWithText(cudaTextureObject_t textObj, short* cudaRegImage
         cudaRegImage[z*width*height+y*width+x] = (short)tex3D<float>(textObj, newX, newY, newZ);
 }
 
+__global__ void tpsCudaWithoutInterpolation(float* cudaPointsX, float* cudaPointsY, float* cudaPointsZ, float* solutionX, float* solutionY,
+                        float* solutionZ, int width, int height, int slices, float* keyX, float* keyY,
+                        float* keyZ, int numOfKeys) {
+  int x = blockDim.x*blockIdx.x + threadIdx.x;
+  int y = blockDim.y*blockIdx.y + threadIdx.y;
+  int z = blockDim.z*blockIdx.z + threadIdx.z;
+
+  float newX = solutionX[0] + x*solutionX[1] + y*solutionX[2] + z*solutionX[3];
+  float newY = solutionY[0] + x*solutionY[1] + y*solutionY[2] + z*solutionY[3];
+  float newZ = solutionZ[0] + x*solutionZ[1] + y*solutionZ[2] + z*solutionZ[3];
+
+  for (int i = 0; i < numOfKeys; i++) {
+    float r = (x-keyX[i])*(x-keyX[i]) + (y-keyY[i])*(y-keyY[i]) + (z-keyZ[i])*(z-keyZ[i]);
+    if (r != 0.0) {
+      newX += r*log(r) * solutionX[i+4];
+      newY += r*log(r) * solutionY[i+4];
+      newZ += r*log(r) * solutionZ[i+4];
+    }
+  }
+
+  if (x <= width-1 && x >= 0)
+    if (y <= height-1 && y >= 0)
+      if (z <= slices-1 && z >= 0) {
+        cudaPointsX[z*height*width+y*width+x] = newX;
+        cudaPointsY[z*height*width+y*width+x] = newY;
+        cudaPointsZ[z*height*width+y*width+x] = newZ;
+      }
+}
+
+// Kernel definition
+short getPixel(int x, int y, int z, short* image, std::vector<int> dimensions) {
+  if (x > dimensions[0]-1 || x < 0) return 0;
+  if (y > dimensions[1]-1 || y < 0) return 0;
+  if (z > dimensions[2]-1 || z < 0) return 0;
+  return image[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
+}
+
+// Kernel definition
+short trilinearInterpolation(float x, float y, float z, short* image, std::vector<int> dimensions) {
+  int u = trunc(x);
+  int v = trunc(y);
+  int w = trunc(z);
+
+  float xd = (x - u);
+  float yd = (y - v);
+  float zd = (z - w);
+
+  short c00 = getPixel(u, v, w, image, dimensions)*(1-xd)
+            + getPixel(u+1, v, w, image, dimensions)*xd;
+
+  short c10 = getPixel(u, v+1, w, image, dimensions)*(1-xd)
+            + getPixel(u+1, v+1, w, image, dimensions)*xd;
+
+  short c01 = getPixel(u, v, w+1, image, dimensions)*(1-xd)
+            + getPixel(u+1, v, w+1, image, dimensions)*xd;
+
+  short c11 = getPixel(u, v+1, w+1, image, dimensions)*(1-xd)
+            + getPixel(u+1, v+1, w+1, image, dimensions)*xd;
+
+  short c0 = c00*(1-yd)+c10*yd;
+  short c1 = c01*(1-yd)+c11*yd;
+
+  short result = c0*(1-zd)+c1*zd;
+  if (result < 0) result = 0;
+  return result;
+}
+
 void startTimeRecord(cudaEvent_t *start, cudaEvent_t *stop) {
   checkCuda(cudaEventCreate(start));
   checkCuda(cudaEventCreate(stop));
@@ -124,7 +193,7 @@ void showExecutionTime(cudaEvent_t *start, cudaEvent_t *stop, std::string output
   checkCuda(cudaEventElapsedTime(&elapsedTime, *start, *stop));
   checkCuda(cudaEventDestroy(*start));
   checkCuda(cudaEventDestroy(*stop));
-  std::cout << output << elapsedTime << " ms\n";
+  std::cout << output << elapsedTime/1000 << " s\n";
 }
 
 int getBlockSize(int maxBlockSize) {
@@ -272,5 +341,82 @@ short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int n
   oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
 
   showExecutionTime(&start, &stop, oss.str());
+  return regImage;
+}
+
+short* interpolateImage(short* imageVoxels, float* imagePointsX, float* imagePointsY, float* imagePointsZ, std::vector<int> dimensions) {
+  short* regImage = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
+
+  for (int x = 0; x < dimensions[0]; x++)
+      for (int y = 0; y < dimensions[1]; y++)
+        for (int z = 0; z < dimensions[2]; z++) {
+          float newX = imagePointsX[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
+          float newY = imagePointsY[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
+          float newZ = imagePointsZ[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
+          short newValue = trilinearInterpolation(newX, newY, newZ, imageVoxels, dimensions);
+          regImage[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x] = newValue;
+        }
+
+  return regImage;
+}
+
+short* runTPSCUDAWithoutInterpolation(tps::CudaMemory cm, short* imageVoxels, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim, int blockSize) {
+  dim3 threadsPerBlock;
+
+  if (occupancy) {
+    int maxBlockSize = getBlockSize(blockSize);
+    threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize, twoDim);
+  } else {
+    threadsPerBlock.x = 8;
+    threadsPerBlock.y = 8;
+    if (twoDim) {
+      threadsPerBlock.z = 1;
+    } else {
+      threadsPerBlock.z = 8;
+    }
+  }
+  std::cout << "threadsPerBlock.x = " << threadsPerBlock.x << std::endl;
+  std::cout << "threadsPerBlock.y = " << threadsPerBlock.y << std::endl;
+  std::cout << "threadsPerBlock.z = " << threadsPerBlock.z << std::endl;
+
+  dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
+                 std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
+                 std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
+
+  float* imagePointsX = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
+  float* imagePointsY = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
+  float* imagePointsZ = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
+
+  for (int slice = 0; slice < dimensions[2]; slice++)
+    for (int col = 0; col < dimensions[0]; col++)
+      for (int row = 0; row < dimensions[1]; row++) {
+        imagePointsX[slice*dimensions[1]*dimensions[0]+col*dimensions[1]+row] = 0;
+        imagePointsY[slice*dimensions[1]*dimensions[0]+col*dimensions[1]+row] = 0;
+        imagePointsZ[slice*dimensions[1]*dimensions[0]+col*dimensions[1]+row] = 0;
+      }
+
+  cudaEvent_t start, stop;
+  startTimeRecord(&start, &stop);
+
+  tpsCudaWithoutInterpolation<<<numBlocks, threadsPerBlock>>>(cm.getImagePointsX(), cm.getImagePointsY(), cm.getImagePointsZ(), cm.getSolutionX(), cm.getSolutionY(),
+                                          cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(),
+                                          cm.getKeypointY(), cm.getKeypointZ(), numberOfCPs);
+
+  checkCuda(cudaDeviceSynchronize());
+  checkCuda(cudaMemcpy(imagePointsX, cm.getImagePointsX(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float), cudaMemcpyDeviceToHost));
+  checkCuda(cudaMemcpy(imagePointsY, cm.getImagePointsY(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float), cudaMemcpyDeviceToHost));
+  checkCuda(cudaMemcpy(imagePointsZ, cm.getImagePointsZ(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float), cudaMemcpyDeviceToHost));
+
+  std::ostringstream oss;
+  oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
+
+  showExecutionTime(&start, &stop, oss.str());
+
+  arma::wall_clock timer;
+  timer.tic();
+  short* regImage = interpolateImage(imageVoxels, imagePointsX, imagePointsY, imagePointsZ, dimensions);
+  double time = timer.toc();
+  std::cout << "Interpolation execution time(" << numberOfCPs << "): " << time << "s" << std::endl;
+
   return regImage;
 }
