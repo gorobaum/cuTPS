@@ -30,8 +30,11 @@ void tps::CudaMemory::allocCudaMemory(tps::Image& image) {
     timer.tic();
     allocCudaKeypoints();
     bool texture = GlobalConfiguration::getInstance().getBoolean("imageTexture");
+    bool cpuInterpolation = GlobalConfiguration::getInstance().getBoolean("cpuInterpolation");
     if (texture) {
         allocCudaImagePixelsTexture(image);
+    } if (cpuInterpolation) {
+        allocCudaImagePoints(image);
     } else {
         allocCudaImagePixels(image);
     }
@@ -105,6 +108,13 @@ void tps::CudaMemory::allocCudaImagePixels(tps::Image& image) {
     checkCuda(cudaMalloc(&targetImage, imageSize*sizeof(short)));
     checkCuda(cudaMemcpy(targetImage, image.getPixelVector(), imageSize*sizeof(short), cudaMemcpyHostToDevice));
     checkCuda(cudaMalloc(&regImage, imageSize*sizeof(short)));
+}
+
+void tps::CudaMemory::allocCudaImagePoints(tps::Image& image) {
+    int numDim = image.numberOfDimension();
+    checkCuda(cudaMalloc(&imagePointsX, imageSize*sizeof(float)));
+    checkCuda(cudaMalloc(&imagePointsY, imageSize*sizeof(float)));
+    checkCuda(cudaMalloc(&imagePointsZ, imageSize*sizeof(float)));
 }
 
 std::vector<float> tps::CudaMemory::getHostSolX() {
@@ -181,7 +191,14 @@ double tps::CudaMemory::memoryEstimation() {
   // std::cout << "solutionsMemory = " << solutionsMemory << std::endl;
   double keypointsMemory = 3.0*numberOfCps*floatSize/(1024*1024);
   // std::cout << "keypointsMemory = " << keypointsMemory << std::endl;
-  double pixelsMemory = 2.0*imageSize*ucharSize/(1024*1024);
+  bool cpuInterpolation = GlobalConfiguration::getInstance().getBoolean("cpuInterpolation");
+  double pixelsMemory;
+  if (cpuInterpolation) {
+    pixelsMemory = 3.0*imageSize*floatSize/(1024*1024);
+  } else {
+    pixelsMemory = 2.0*imageSize*ucharSize/(1024*1024);
+  }
+
   // std::cout << "pixelsMemory = " << pixelsMemory << std::endl;
   double solverMemory = (sysDim*sysDim*doubleSize +
                         sysDim*doubleSize +

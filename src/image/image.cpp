@@ -28,6 +28,10 @@ bool tps::Image::isTwoDimensional() {
     return (dimensions_[2] == 1);
 }
 
+int tps::Image::numberOfDimension() {
+    return (dimensions_[2] == 1) ? 2 : 3;
+}
+
 short tps::Image::getPixelAt(int x, int y, int z) {
   if (x > dimensions_[0]-1 || x < 0)
     return 0;

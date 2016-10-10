@@ -3,9 +3,10 @@ linearSystemSolver:cuda
 tps:cuda
 calculateOccupancy:true
 parallelExecution:true
+imageTexture:true
+cpuInterpolation:false
 numberOfThreads:4
 blockSize:512
-imageTexture:true
 resultImageMod:allOn
 ../3dconfigurations/config3d1.tps
 ../3dconfigurations/config3d2.tps
