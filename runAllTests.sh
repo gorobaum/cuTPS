@@ -37,5 +37,5 @@ for i in {1..10};
 done
 
 for i in {1..10};
-  do ./build/tps 3dconfigurations/config3DallOn.txt >> resultsAllOn.txt;
+  do ./tps ../3dconfigurations/config3DallOn.txt >> resultsAllOn.txt;
 done
