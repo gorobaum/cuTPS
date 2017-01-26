@@ -60,9 +60,12 @@ def deformSinusiodal3D(imagePixels, affine):
     for x in range(imagePixels.shape[0]):
         for y in range(imagePixels.shape[1]):
             for z in range(imagePixels.shape[2]):
-                newCol = x + 2.0*math.sin(y/8.0) - 2.0*math.cos(z/16.0)
-                newRow = y + 4.0*math.sin(x/8.0) - 2.0*math.sin(z/8.0)
-                newDepth = z + 2.0*math.sin(x/16.0) - 4.0*math.cos(y/8.0)
+                newCol = x + 2.0*math.sin(y/8.0) -
+                             2.0*math.cos(z/16.0)
+                newRow = y + 4.0*math.sin(x/8.0) -
+                             2.0*math.sin(z/8.0)
+                newDepth = z + 2.0*math.sin(x/16.0) -
+                               4.0*math.cos(y/8.0)
 
                 newPixel = trilinear(imagePixels, newCol, newRow, newDepth)
                 deformedPixels.itemset((x,y,z), newPixel)

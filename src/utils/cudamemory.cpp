@@ -31,9 +31,10 @@ void tps::CudaMemory::allocCudaMemory(tps::Image& image) {
     allocCudaKeypoints();
     bool texture = GlobalConfiguration::getInstance().getBoolean("imageTexture");
     bool cpuInterpolation = GlobalConfiguration::getInstance().getBoolean("cpuInterpolation");
+    bool checkError = GlobalConfiguration::getInstance().getBoolean("checkError");
     if (texture) {
         allocCudaImagePixelsTexture(image);
-    } if (cpuInterpolation) {
+    } if (cpuInterpolation || checkError) {
         allocCudaImagePoints(image);
     } else {
         allocCudaImagePixels(image);
