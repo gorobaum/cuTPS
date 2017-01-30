@@ -467,6 +467,25 @@ float normOf(float x, float y, float z) {
   return std::sqrt(x*x + y*y + z*z);
 }
 
+float calculateSD(float meanError, float *vectorFieldX, float* vectorFieldY,
+                  float* vectorFieldZ, std::vector<int> dimensions) {
+  float standardDeviation = 0.0;
+
+  for (int x = 0; x < dimensions[0]; x++)
+    for (int y = 0; y < dimensions[1]; y++)
+      for (int z = 0; z < dimensions[2]; z++) {
+        float* evf = generateDeforVectorAt(x, y, z); // expectedVectorField
+        int pos = z*dimensions[1]*dimensions[0]+x*dimensions[1]+y;
+        float currentError = normOf(evf[0] - vectorFieldX[pos], evf[1] - vectorFieldY[pos],
+                       evf[2] - vectorFieldZ[pos])/normOf(evf[0], evf[1], evf[2]);
+        standardDeviation += std::pow(currentError - meanError, 2);
+      }
+  standardDeviation /= (dimensions[0]*dimensions[1]*dimensions[2]*1.0);
+  standardDeviation = std::sqrt(standardDeviation);
+
+  return standardDeviation;
+}
+
 float calculateError(float *vectorFieldX, float* vectorFieldY,
                      float* vectorFieldZ, std::vector<int> dimensions) {
   float error = 0.0;
@@ -550,9 +569,11 @@ short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
   arma::wall_clock timer;
   timer.tic();
   float error = calculateError(vectorFieldX, vectorFieldY, vectorFieldZ, dimensions);
+  float sd = calculateSD(error, vectorFieldX, vectorFieldY, vectorFieldZ, dimensions);
   double time = timer.toc();
   std::cout << "Calculate error execution time(" << numberOfCPs << "): " << time << "s" << std::endl;
   std::cout << "Error for (" << numberOfCPs << ") = " << error << std::endl;
+  std::cout << "SD for (" << numberOfCPs << ") = " << sd << std::endl;
 
   short* regImage = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
 
