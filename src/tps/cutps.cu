@@ -13,11 +13,11 @@
 #include <cmath>
 
 cudaError_t checkCuda(cudaError_t result) {
-    if (result != cudaSuccess) {
-        std::cout << "CUDA Runtime Error: \n" << cudaGetErrorString(result) << std::endl;
-        assert(result == cudaSuccess);
-    }
-    return result;
+  if (result != cudaSuccess) {
+    std::cout << "CUDA Runtime Error: \n" << cudaGetErrorString(result) << std::endl;
+    assert(result == cudaSuccess);
+  }
+  return result;
 }
 
 // Kernel definition
@@ -30,7 +30,7 @@ __device__ short cudaGetPixel(int x, int y, int z, short* image, int width, int 
 
 // Kernel definition
 __device__ short cudaTrilinearInterpolation(float x, float y, float z, short* image,
-                                            int width, int height, int slices) {
+    int width, int height, int slices) {
   int u = trunc(x);
   int v = trunc(y);
   int w = trunc(z);
@@ -40,16 +40,16 @@ __device__ short cudaTrilinearInterpolation(float x, float y, float z, short* im
   float zd = (z - w);
 
   short c00 = cudaGetPixel(u, v, w, image, width, height, slices)*(1-xd)
-            + cudaGetPixel(u+1, v, w, image, width, height, slices)*xd;
+    + cudaGetPixel(u+1, v, w, image, width, height, slices)*xd;
 
   short c10 = cudaGetPixel(u, v+1, w, image, width, height, slices)*(1-xd)
-            + cudaGetPixel(u+1, v+1, w, image, width, height, slices)*xd;
+    + cudaGetPixel(u+1, v+1, w, image, width, height, slices)*xd;
 
   short c01 = cudaGetPixel(u, v, w+1, image, width, height, slices)*(1-xd)
-            + cudaGetPixel(u+1, v, w+1, image, width, height, slices)*xd;
+    + cudaGetPixel(u+1, v, w+1, image, width, height, slices)*xd;
 
   short c11 = cudaGetPixel(u, v+1, w+1, image, width, height, slices)*(1-xd)
-            + cudaGetPixel(u+1, v+1, w+1, image, width, height, slices)*xd;
+    + cudaGetPixel(u+1, v+1, w+1, image, width, height, slices)*xd;
 
   short c0 = c00*(1-yd)+c10*yd;
   short c1 = c01*(1-yd)+c11*yd;
@@ -61,8 +61,8 @@ __device__ short cudaTrilinearInterpolation(float x, float y, float z, short* im
 
 // Kernel definition
 __global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX, float* solutionY,
-                        float* solutionZ, int width, int height, int slices, float* keyX, float* keyY,
-                        float* keyZ, int numOfKeys) {
+    float* solutionZ, int width, int height, int slices, float* keyX, float* keyY,
+    float* keyZ, int numOfKeys) {
   int x = blockDim.x*blockIdx.x + threadIdx.x;
   int y = blockDim.y*blockIdx.y + threadIdx.y;
   int z = blockDim.z*blockIdx.z + threadIdx.z;
@@ -88,8 +88,8 @@ __global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX,
 
 // Kernel definition
 __global__ void tpsCudaWithText(cudaTextureObject_t textObj, short* cudaRegImage, float* solutionX, float* solutionY,
-                        float* solutionZ, int width, int height, int slices, float* keyX, float* keyY,
-                        float* keyZ, int numOfKeys) {
+    float* solutionZ, int width, int height, int slices, float* keyX, float* keyY,
+    float* keyZ, int numOfKeys) {
   int x = blockDim.x*blockIdx.x + threadIdx.x;
   int y = blockDim.y*blockIdx.y + threadIdx.y;
   int z = blockDim.z*blockIdx.z + threadIdx.z;
@@ -114,10 +114,10 @@ __global__ void tpsCudaWithText(cudaTextureObject_t textObj, short* cudaRegImage
 }
 
 __global__ void tpsCudaWithoutInterpolation(float* cudapointsx,
-                  float* cudapointsy, float* cudapointsz, float* solutionx,
-                  float* solutiony, float* solutionz, int width, int height,
-                  int slices, float* keyx, float* keyy, float* keyz,
-                  int numofkeys) {
+    float* cudapointsy, float* cudapointsz, float* solutionx,
+    float* solutiony, float* solutionz, int width, int height,
+    int slices, float* keyx, float* keyy, float* keyz,
+    int numofkeys) {
 
   int x = blockDim.x*blockIdx.x + threadIdx.x;
   int y = blockDim.y*blockIdx.y + threadIdx.y;
@@ -146,8 +146,8 @@ __global__ void tpsCudaWithoutInterpolation(float* cudapointsx,
 }
 
 __global__ void tpscudaVectorField(float* cudapointsx, float* cudapointsy, float* cudapointsz, float* solutionx, float* solutiony,
-                        float* solutionz, int width, int height, int slices, float* keyx, float* keyy,
-                        float* keyz, int numofkeys) {
+    float* solutionz, int width, int height, int slices, float* keyx, float* keyy,
+    float* keyz, int numofkeys) {
   int x = blockDim.x*blockIdx.x + threadIdx.x;
   int y = blockDim.y*blockIdx.y + threadIdx.y;
   int z = blockDim.z*blockIdx.z + threadIdx.z;
@@ -193,16 +193,16 @@ short trilinearInterpolation(float x, float y, float z, short* image, std::vecto
   float zd = (z - w);
 
   short c00 = getPixel(u, v, w, image, dimensions)*(1-xd)
-            + getPixel(u+1, v, w, image, dimensions)*xd;
+    + getPixel(u+1, v, w, image, dimensions)*xd;
 
   short c10 = getPixel(u, v+1, w, image, dimensions)*(1-xd)
-            + getPixel(u+1, v+1, w, image, dimensions)*xd;
+    + getPixel(u+1, v+1, w, image, dimensions)*xd;
 
   short c01 = getPixel(u, v, w+1, image, dimensions)*(1-xd)
-            + getPixel(u+1, v, w+1, image, dimensions)*xd;
+    + getPixel(u+1, v, w+1, image, dimensions)*xd;
 
   short c11 = getPixel(u, v+1, w+1, image, dimensions)*(1-xd)
-            + getPixel(u+1, v+1, w+1, image, dimensions)*xd;
+    + getPixel(u+1, v+1, w+1, image, dimensions)*xd;
 
   short c0 = c00*(1-yd)+c10*yd;
   short c1 = c01*(1-yd)+c11*yd;
@@ -304,8 +304,8 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
   std::cout << "threadsPerBlock.z = " << threadsPerBlock.z << std::endl;
 
   dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
-                 std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
-                 std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
+      std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
+      std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
 
   short* regImage = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
 
@@ -318,8 +318,8 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
   startTimeRecord(&start, &stop);
 
   tpsCuda<<<numBlocks, threadsPerBlock>>>(cm.getTargetImage(), cm.getRegImage(), cm.getSolutionX(), cm.getSolutionY(),
-                                          cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(),
-                                          cm.getKeypointY(), cm.getKeypointZ(), numberOfCPs);
+      cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(),
+      cm.getKeypointY(), cm.getKeypointZ(), numberOfCPs);
   checkCuda(cudaDeviceSynchronize());
   checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
 
@@ -350,8 +350,8 @@ short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int n
   std::cout << "threadsPerBlock.z = " << threadsPerBlock.z << std::endl;
 
   dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
-                 std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
-                 std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
+      std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
+      std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
 
   short* regImage = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
 
@@ -364,8 +364,8 @@ short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int n
   startTimeRecord(&start, &stop);
 
   tpsCudaWithText<<<numBlocks, threadsPerBlock>>>(cm.getTexObj(), cm.getRegImage(), cm.getSolutionX(), cm.getSolutionY(),
-                                          cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(),
-                                          cm.getKeypointY(), cm.getKeypointZ(), numberOfCPs);
+      cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(),
+      cm.getKeypointY(), cm.getKeypointZ(), numberOfCPs);
   checkCuda(cudaDeviceSynchronize());
   checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
 
@@ -380,14 +380,14 @@ short* interpolateImage(short* imageVoxels, float* imagePointsX, float* imagePoi
   short* regImage = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
 
   for (int x = 0; x < dimensions[0]; x++)
-      for (int y = 0; y < dimensions[1]; y++)
-        for (int z = 0; z < dimensions[2]; z++) {
-          float newX = imagePointsX[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
-          float newY = imagePointsY[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
-          float newZ = imagePointsZ[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
-          short newValue = trilinearInterpolation(newX, newY, newZ, imageVoxels, dimensions);
-          regImage[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x] = newValue;
-        }
+    for (int y = 0; y < dimensions[1]; y++)
+      for (int z = 0; z < dimensions[2]; z++) {
+        float newX = imagePointsX[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
+        float newY = imagePointsY[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
+        float newZ = imagePointsZ[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
+        short newValue = trilinearInterpolation(newX, newY, newZ, imageVoxels, dimensions);
+        regImage[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x] = newValue;
+      }
 
   return regImage;
 }
@@ -412,8 +412,8 @@ short* runTPSCUDAWithoutInterpolation(tps::CudaMemory cm, short* imageVoxels, st
   std::cout << "threadsPerBlock.z = " << threadsPerBlock.z << std::endl;
 
   dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
-                 std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
-                 std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
+      std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
+      std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
 
   float* imagePointsX = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
   float* imagePointsY = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
@@ -431,8 +431,8 @@ short* runTPSCUDAWithoutInterpolation(tps::CudaMemory cm, short* imageVoxels, st
   startTimeRecord(&start, &stop);
 
   tpsCudaWithoutInterpolation<<<numBlocks, threadsPerBlock>>>(cm.getImagePointsX(), cm.getImagePointsY(), cm.getImagePointsZ(), cm.getSolutionX(), cm.getSolutionY(),
-                                          cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(),
-                                          cm.getKeypointY(), cm.getKeypointZ(), numberOfCPs);
+      cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(),
+      cm.getKeypointY(), cm.getKeypointZ(), numberOfCPs);
 
   checkCuda(cudaDeviceSynchronize());
   checkCuda(cudaMemcpy(imagePointsX, cm.getImagePointsX(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float), cudaMemcpyDeviceToHost));
@@ -468,7 +468,7 @@ float normOf(float x, float y, float z) {
 }
 
 float calculateSD(float meanError, float *vectorFieldX, float* vectorFieldY,
-                  float* vectorFieldZ, std::vector<int> dimensions) {
+    float* vectorFieldZ, std::vector<int> dimensions) {
   float standardDeviation = 0.0;
 
   for (int x = 0; x < dimensions[0]; x++)
@@ -477,7 +477,7 @@ float calculateSD(float meanError, float *vectorFieldX, float* vectorFieldY,
         float* evf = generateDeforVectorAt(x, y, z); // expectedVectorField
         int pos = z*dimensions[1]*dimensions[0]+x*dimensions[1]+y;
         float currentError = normOf(evf[0] - vectorFieldX[pos], evf[1] - vectorFieldY[pos],
-                       evf[2] - vectorFieldZ[pos])/normOf(evf[0], evf[1], evf[2]);
+            evf[2] - vectorFieldZ[pos])/normOf(evf[0], evf[1], evf[2]);
         standardDeviation += std::pow(currentError - meanError, 2);
       }
   standardDeviation /= (dimensions[0]*dimensions[1]*dimensions[2]*1.0);
@@ -487,7 +487,7 @@ float calculateSD(float meanError, float *vectorFieldX, float* vectorFieldY,
 }
 
 float calculateError(float *vectorFieldX, float* vectorFieldY,
-                     float* vectorFieldZ, std::vector<int> dimensions) {
+    float* vectorFieldZ, std::vector<int> dimensions) {
   float error = 0.0;
 
   for (int x = 0; x < dimensions[0]; x++)
@@ -496,7 +496,7 @@ float calculateError(float *vectorFieldX, float* vectorFieldY,
         float* evf = generateDeforVectorAt(x, y, z); // expectedVectorField
         int pos = z*dimensions[1]*dimensions[0]+x*dimensions[1]+y;
         error += normOf(evf[0] - vectorFieldX[pos], evf[1] - vectorFieldY[pos],
-                       evf[2] - vectorFieldZ[pos])/normOf(evf[0], evf[1], evf[2]);
+            evf[2] - vectorFieldZ[pos])/normOf(evf[0], evf[1], evf[2]);
       }
   error /= (dimensions[0]*dimensions[1]*dimensions[2]*1.0);
 
@@ -504,9 +504,9 @@ float calculateError(float *vectorFieldX, float* vectorFieldY,
 }
 
 short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
-                                      std::vector<int> dimensions,
-                                      int numberOfCPs, bool occupancy,
-                                      bool twoDim, int blockSize) {
+    std::vector<int> dimensions,
+    int numberOfCPs, bool occupancy,
+    bool twoDim, int blockSize) {
   dim3 threadsPerBlock;
 
   if (occupancy) {
@@ -526,8 +526,8 @@ short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
   std::cout << "threadsPerBlock.z = " << threadsPerBlock.z << std::endl;
 
   dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
-                 std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
-                 std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
+      std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
+      std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
 
   float* vectorFieldX = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
   float* vectorFieldY = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
@@ -552,14 +552,14 @@ short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
 
   checkCuda(cudaDeviceSynchronize());
   checkCuda(cudaMemcpy(vectorFieldX, cm.getImagePointsX(),
-            dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
-            cudaMemcpyDeviceToHost));
+        dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
+        cudaMemcpyDeviceToHost));
   checkCuda(cudaMemcpy(vectorFieldY, cm.getImagePointsY(),
-            dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
-            cudaMemcpyDeviceToHost));
+        dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
+        cudaMemcpyDeviceToHost));
   checkCuda(cudaMemcpy(vectorFieldZ, cm.getImagePointsZ(),
-            dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
-            cudaMemcpyDeviceToHost));
+        dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
+        cudaMemcpyDeviceToHost));
 
   std::ostringstream oss;
   oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
@@ -578,10 +578,10 @@ short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
   short* regImage = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
 
   for (int x = 0; x < dimensions[0]; x++)
-      for (int y = 0; y < dimensions[1]; y++)
-        for (int z = 0; z < dimensions[2]; z++) {
-          regImage[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x] = 0;
-        }
+    for (int y = 0; y < dimensions[1]; y++)
+      for (int z = 0; z < dimensions[2]; z++) {
+        regImage[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x] = 0;
+      }
 
   return regImage;
 }

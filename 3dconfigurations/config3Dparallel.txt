@@ -5,6 +5,7 @@ calculateOccupancy:false
 parallelExecution:true
 numberOfThreads:4
 cpuInterpolation:false
+checkError:false
 blockSize:512
 imageTexture:false
 resultImageMod:parallel

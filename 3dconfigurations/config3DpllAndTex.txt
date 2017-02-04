@@ -6,6 +6,7 @@ parallelExecution:true
 imageTexture:true
 numberOfThreads:4
 cpuInterpolation:false
+checkError:false
 blockSize:512
 resultImageMod:pllAndTex
 ../3dconfigurations/config3d1.tps

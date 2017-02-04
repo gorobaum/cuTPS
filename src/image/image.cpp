@@ -4,7 +4,7 @@
 
 void tps::Image::changePixelAt(int x, int y, int z, short value) {
   if (x >= 0 && x < dimensions_[0]-1 && y >= 0 && y < dimensions_[1]-1 && z >= 0 && z <= dimensions_[2]-1) {
-      image[x+y*dimensions_[0]+z*dimensions_[0]*dimensions_[1]] = value;
+    image[x+y*dimensions_[0]+z*dimensions_[0]*dimensions_[1]] = value;
   }
 }
 
@@ -25,11 +25,11 @@ std::vector<short> tps::Image::getMinMax() {
 }
 
 bool tps::Image::isTwoDimensional() {
-    return (dimensions_[2] == 1);
+  return (dimensions_[2] == 1);
 }
 
 int tps::Image::numberOfDimension() {
-    return (dimensions_[2] == 1) ? 2 : 3;
+  return (dimensions_[2] == 1) ? 2 : 3;
 }
 
 short tps::Image::getPixelAt(int x, int y, int z) {
@@ -67,6 +67,21 @@ short tps::Image::trilinearInterpolation(float x, float y, float z) {
   return newValue;
 }
 
+
+tps::Image tps::Image::createSubtractionImageFrom(Image sub) {
+  tps::Image result(dimensions_);
+  for (int x = 0; x < dimensions_[0]; x++)
+    for (int y = 0; y < dimensions_[1]; y++)
+      for (int z = 0; z < dimensions_[2]; z++) {
+        short subVoxel = sub.getPixelAt(x, y, z);
+        short thisVoxel = getPixelAt(x, y, z);
+        short resultVoxel = std::abs(subVoxel - thisVoxel);
+        result.changePixelAt(x, y, z, resultVoxel);
+      }
+  return result;
+}
+
+
 short tps::Image::NNInterpolation(float x, float y, float z) {
   int nearX = getNearestInteger(x);
   int nearY = getNearestInteger(y);
@@ -81,10 +96,10 @@ short* tps::Image::getPixelVector() {
 
 float* tps::Image::getFloatPixelVector() {
   float* vector = (float*)malloc(dimensions_[0]*dimensions_[1]*dimensions_[2]*sizeof(float));
-    for (int x = 0; x < dimensions_[0]; x++)
-      for (int y = 0; y < dimensions_[1]; y++)
-        for (int z = 0; z < dimensions_[2]; z++)
-          vector[z*dimensions_[0]*dimensions_[1]+y*dimensions_[0]+x] = image[z*dimensions_[0]*dimensions_[1]+y*dimensions_[0]+x];
+  for (int x = 0; x < dimensions_[0]; x++)
+    for (int y = 0; y < dimensions_[1]; y++)
+      for (int z = 0; z < dimensions_[2]; z++)
+        vector[z*dimensions_[0]*dimensions_[1]+y*dimensions_[0]+x] = image[z*dimensions_[0]*dimensions_[1]+y*dimensions_[0]+x];
   return vector;
 }
 

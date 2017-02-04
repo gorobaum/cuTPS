@@ -78,6 +78,9 @@ void RunInstance::executeTps() {
     std::string resultImage = instanceConfiguration_.getString("resultImage");
     resultImage += GlobalConfiguration::getInstance().getString("resultImageMod");
     imageHandler_->saveImageData(result, resultImage);
+
+    Image subImage = result.createSubtractionImageFrom(referenceImage_);
+    imageHandler_->saveImageData(subImage, resultImage+"_sub_");
     isDone_ = true;
     if (GlobalConfiguration::getInstance().isCuda())
         cudaMemory_.freeMemory();
