@@ -164,9 +164,6 @@ tps::Image tps::ParallelTPS::calculateError(int numberOfCPs) {
   float error = pcalculateError(vectorField, dimensions_);
   float sd = pcalculateSD(error, vectorField, dimensions_);
 
-  for(int i = 0; i < 100; i++)
-    std::cout << vectorField[i][0] << " " << vectorField[i][1] << " " << vectorField[i][2] << std::endl;
-
   std::cout << "Error for (" << numberOfCPs << ") = " << error << std::endl;
   std::cout << "SD for (" << numberOfCPs << ") = " << sd << std::endl;
 
