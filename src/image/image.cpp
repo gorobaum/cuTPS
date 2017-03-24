@@ -81,6 +81,19 @@ tps::Image tps::Image::createSubtractionImageFrom(Image sub) {
   return result;
 }
 
+float tps::Image::meanSquaredError(Image sub) {
+  float mse = 0.0;
+  for (int x = 0; x < dimensions_[0]; x++)
+    for (int y = 0; y < dimensions_[1]; y++)
+      for (int z = 0; z < dimensions_[2]; z++) {
+        short subVoxel = sub.getPixelAt(x, y, z);
+        short thisVoxel = getPixelAt(x, y, z);
+        float diff = 1.0*(subVoxel - thisVoxel);
+        mse += diff*diff;
+      }
+  mse /= dimensions_[0]*dimensions_[1]*dimensions_[2];
+  return mse;
+}
 
 short tps::Image::NNInterpolation(float x, float y, float z) {
   int nearX = getNearestInteger(x);

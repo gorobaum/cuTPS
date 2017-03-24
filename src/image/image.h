@@ -27,6 +27,7 @@ namespace tps {
       short* getPixelVector();
       float* getFloatPixelVector();
       std::vector<short> getMinMax();
+      float meanSquaredError(Image sub);
       void setPixelVector(short* vector);
       short getPixelAt(int x, int y, int z);
       Image createSubtractionImageFrom(Image sub);

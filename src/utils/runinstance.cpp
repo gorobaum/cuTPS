@@ -82,6 +82,12 @@ void RunInstance::executeTps() {
     Image subImage = result.createSubtractionImageFrom(referenceImage_);
     imageHandler_->saveImageData(subImage, resultImage+"_sub_");
     isDone_ = true;
+
+    std::cout << "MSE for Ref Tar(" << solutionX_.size() << ") = "
+              << referenceImage_.meanSquaredError(targetImage_) << std::endl;
+    std::cout << "MSE for Ref Res(" << solutionX_.size() << ") = "
+              << referenceImage_.meanSquaredError(result) << std::endl;
+
     if (GlobalConfiguration::getInstance().isCuda())
         cudaMemory_.freeMemory();
 }
@@ -144,6 +150,9 @@ void RunInstance::solveLinearSystemWithArmadillo() {
 
 void RunInstance::generateKeypointImage() {
     Image result(referenceImage_.getDimensions());
+
+    short* pagode = targetImage_.getPixelVector();
+    result.setPixelVector(pagode);
 
     for (int i = 0; i < targetKeypoints_.size(); i++) {
         int x = std::ceil(targetKeypoints_[i][0]);
