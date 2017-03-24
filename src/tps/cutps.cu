@@ -59,6 +59,27 @@ __device__ short cudaTrilinearInterpolation(float x, float y, float z, short* im
   return result;
 }
 
+__device__ float* calculateNewPoint(float* solutionX, float* solutionY,
+                            float* solutionZ, float* keyX, float* keyY,
+                            float* keyZ, int x, int y, int z, int numOfKeys) {
+  float* newPoint = (float*)malloc(3*sizeof(float));
+
+  newPoint[0] = solutionX[0] + x*solutionX[1] + y*solutionX[2] + z*solutionX[3];
+  newPoint[1] = solutionY[0] + x*solutionY[1] + y*solutionY[2] + z*solutionY[3];
+  newPoint[2] = solutionZ[0] + x*solutionZ[1] + y*solutionZ[2] + z*solutionZ[3];
+
+  for (int i = 0; i < numOfKeys; i++) {
+    float r = (x-keyX[i])*(x-keyX[i]) + (y-keyY[i])*(y-keyY[i]) + (z-keyZ[i])*(z-keyZ[i]);
+    if (r != 0.0) {
+      newPoint[0] += r*log(r) * solutionX[i+4];
+      newPoint[1] += r*log(r) * solutionY[i+4];
+      newPoint[2] += r*log(r) * solutionZ[i+4];
+    }
+  }
+
+  return newPoint;
+}
+
 // Kernel definition
 __global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX, float* solutionY,
     float* solutionZ, int width, int height, int slices, float* keyX, float* keyY,
@@ -67,23 +88,13 @@ __global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX,
   int y = blockDim.y*blockIdx.y + threadIdx.y;
   int z = blockDim.z*blockIdx.z + threadIdx.z;
 
-  float newX = solutionX[0] + x*solutionX[1] + y*solutionX[2] + z*solutionX[3];
-  float newY = solutionY[0] + x*solutionY[1] + y*solutionY[2] + z*solutionY[3];
-  float newZ = solutionZ[0] + x*solutionZ[1] + y*solutionZ[2] + z*solutionZ[3];
-
-  for (int i = 0; i < numOfKeys; i++) {
-    float r = (x-keyX[i])*(x-keyX[i]) + (y-keyY[i])*(y-keyY[i]) + (z-keyZ[i])*(z-keyZ[i]);
-    if (r != 0.0) {
-      newX += r*log(r) * solutionX[i+4];
-      newY += r*log(r) * solutionY[i+4];
-      newZ += r*log(r) * solutionZ[i+4];
-    }
-  }
+  float* newPoint = calculateNewPoint(solutionX, solutionY, solutionZ, keyX, keyY, keyZ, x, y, z, numOfKeys);
 
   if (x <= width-1 && x >= 0)
     if (y <= height-1 && y >= 0)
       if (z <= slices-1 && z >= 0)
-        cudaRegImage[z*height*width+y*width+x] = cudaTrilinearInterpolation(newX, newY, newZ, cudaImage, width, height, slices);
+        cudaRegImage[z*height*width+y*width+x] = cudaTrilinearInterpolation(newPoint[0], newPoint[1], newPoint[2], cudaImage, width, height, slices);
+  free(newPoint);
 }
 
 // Kernel definition
