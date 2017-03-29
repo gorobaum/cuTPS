@@ -12,6 +12,10 @@
 
 #include <cmath>
 
+typedef struct {
+  float x, y, z;
+} Point;
+
 cudaError_t checkCuda(cudaError_t result) {
   if (result != cudaSuccess) {
     std::cout << "CUDA Runtime Error: \n" << cudaGetErrorString(result) << std::endl;
@@ -20,8 +24,30 @@ cudaError_t checkCuda(cudaError_t result) {
   return result;
 }
 
+void startTimeRecord(cudaEvent_t *start, cudaEvent_t *stop) {
+  checkCuda(cudaEventCreate(start));
+  checkCuda(cudaEventCreate(stop));
+  checkCuda(cudaEventRecord(*start, 0));
+}
+
+void showExecutionTime(cudaEvent_t *start, cudaEvent_t *stop, std::string output) {
+  checkCuda(cudaEventRecord(*stop, 0));
+  checkCuda(cudaEventSynchronize(*stop));
+  float elapsedTime;
+  checkCuda(cudaEventElapsedTime(&elapsedTime, *start, *stop));
+  checkCuda(cudaEventDestroy(*start));
+  checkCuda(cudaEventDestroy(*stop));
+  std::cout << output << elapsedTime/1000 << " s\n";
+}
+
+
+//=====================
+//KERNEL
+//====================
+
+
 // Kernel definition
-__device__ short cudaGetPixel(int x, int y, int z, short* image, int width, int height, int slices) {
+__device__ short cudaGetPixel(int x, int y, int z, short* image, int width, int height, int slices){
   if (x > width-1 || x < 0) return 0;
   if (y > height-1 || y < 0) return 0;
   if (z > slices-1 || z < 0) return 0;
@@ -59,21 +85,21 @@ __device__ short cudaTrilinearInterpolation(float x, float y, float z, short* im
   return result;
 }
 
-__device__ float* calculateNewPoint(float* solutionX, float* solutionY,
+__device__ Point calculateNewPoint(float* solutionX, float* solutionY,
                             float* solutionZ, float* keyX, float* keyY,
                             float* keyZ, int x, int y, int z, int numOfKeys) {
-  float* newPoint = (float*)malloc(3*sizeof(float));
+  Point newPoint;
 
-  newPoint[0] = solutionX[0] + x*solutionX[1] + y*solutionX[2] + z*solutionX[3];
-  newPoint[1] = solutionY[0] + x*solutionY[1] + y*solutionY[2] + z*solutionY[3];
-  newPoint[2] = solutionZ[0] + x*solutionZ[1] + y*solutionZ[2] + z*solutionZ[3];
+  newPoint.x = solutionX[0] + x*solutionX[1] + y*solutionX[2] + z*solutionX[3];
+  newPoint.y = solutionY[0] + x*solutionY[1] + y*solutionY[2] + z*solutionY[3];
+  newPoint.z = solutionZ[0] + x*solutionZ[1] + y*solutionZ[2] + z*solutionZ[3];
 
   for (int i = 0; i < numOfKeys; i++) {
     float r = (x-keyX[i])*(x-keyX[i]) + (y-keyY[i])*(y-keyY[i]) + (z-keyZ[i])*(z-keyZ[i]);
     if (r != 0.0) {
-      newPoint[0] += r*log(r) * solutionX[i+4];
-      newPoint[1] += r*log(r) * solutionY[i+4];
-      newPoint[2] += r*log(r) * solutionZ[i+4];
+      newPoint.x += r*log(r) * solutionX[i+4];
+      newPoint.y += r*log(r) * solutionY[i+4];
+      newPoint.z += r*log(r) * solutionZ[i+4];
     }
   }
 
@@ -88,13 +114,15 @@ __global__ void tpsCuda(short* cudaImage, short* cudaRegImage, float* solutionX,
   int y = blockDim.y*blockIdx.y + threadIdx.y;
   int z = blockDim.z*blockIdx.z + threadIdx.z;
 
-  float* newPoint = calculateNewPoint(solutionX, solutionY, solutionZ, keyX, keyY, keyZ, x, y, z, numOfKeys);
+  Point newPoint = calculateNewPoint(solutionX, solutionY, solutionZ, keyX,
+                                     keyY, keyZ, x, y, z, numOfKeys);
 
   if (x <= width-1 && x >= 0)
     if (y <= height-1 && y >= 0)
       if (z <= slices-1 && z >= 0)
-        cudaRegImage[z*height*width+y*width+x] = cudaTrilinearInterpolation(newPoint[0], newPoint[1], newPoint[2], cudaImage, width, height, slices);
-  free(newPoint);
+        cudaRegImage[z*height*width+y*width+x] =
+              cudaTrilinearInterpolation(newPoint.x, newPoint.y, newPoint.z,
+                                         cudaImage, width, height, slices);
 }
 
 // Kernel definition
@@ -105,23 +133,14 @@ __global__ void tpsCudaWithText(cudaTextureObject_t textObj, short* cudaRegImage
   int y = blockDim.y*blockIdx.y + threadIdx.y;
   int z = blockDim.z*blockIdx.z + threadIdx.z;
 
-  float newX = solutionX[0] + x*solutionX[1] + y*solutionX[2] + z*solutionX[3];
-  float newY = solutionY[0] + x*solutionY[1] + y*solutionY[2] + z*solutionY[3];
-  float newZ = solutionZ[0] + x*solutionZ[1] + y*solutionZ[2] + z*solutionZ[3];
-
-  for (int i = 0; i < numOfKeys; i++) {
-    float r = (x-keyX[i])*(x-keyX[i]) + (y-keyY[i])*(y-keyY[i]) + (z-keyZ[i])*(z-keyZ[i]);
-    if (r != 0.0) {
-      newX += r*log(r) * solutionX[i+4];
-      newY += r*log(r) * solutionY[i+4];
-      newZ += r*log(r) * solutionZ[i+4];
-    }
-  }
+  Point newPoint = calculateNewPoint(solutionX, solutionY, solutionZ,
+                                     keyX, keyY, keyZ, x, y, z, numOfKeys);
 
   if (x <= width-1 && x >= 0)
     if (y <= height-1 && y >= 0)
       if (z <= slices-1 && z >= 0)
-        cudaRegImage[z*width*height+y*width+x] = (short)tex3D<float>(textObj, newX, newY, newZ);
+        cudaRegImage[z*width*height+y*width+x] =
+            (short)tex3D<float>(textObj, newPoint.x, newPoint.y, newPoint.z);
 }
 
 __global__ void tpsCudaWithoutInterpolation(float* cudapointsx,
@@ -134,25 +153,15 @@ __global__ void tpsCudaWithoutInterpolation(float* cudapointsx,
   int y = blockDim.y*blockIdx.y + threadIdx.y;
   int z = blockDim.z*blockIdx.z + threadIdx.z;
 
-  float newx = solutionx[0] + x*solutionx[1] + y*solutionx[2] + z*solutionx[3];
-  float newy = solutiony[0] + x*solutiony[1] + y*solutiony[2] + z*solutiony[3];
-  float newz = solutionz[0] + x*solutionz[1] + y*solutionz[2] + z*solutionz[3];
-
-  for (int i = 0; i < numofkeys; i++) {
-    float r = (x-keyx[i])*(x-keyx[i]) + (y-keyy[i])*(y-keyy[i]) + (z-keyz[i])*(z-keyz[i]);
-    if (r != 0.0) {
-      newx += r*log(r) * solutionx[i+4];
-      newy += r*log(r) * solutiony[i+4];
-      newz += r*log(r) * solutionz[i+4];
-    }
-  }
+  Point newPoint = calculateNewPoint(solutionx, solutiony, solutionz,
+                                     keyx, keyy, keyz, x, y, z, numofkeys);
 
   if (x <= width-1 && x >= 0)
     if (y <= height-1 && y >= 0)
       if (z <= slices-1 && z >= 0) {
-        cudapointsx[z*height*width+y*width+x] = newx;
-        cudapointsy[z*height*width+y*width+x] = newy;
-        cudapointsz[z*height*width+y*width+x] = newz;
+        cudapointsx[z*height*width+y*width+x] = newPoint.x;
+        cudapointsy[z*height*width+y*width+x] = newPoint.y;
+        cudapointsz[z*height*width+y*width+x] = newPoint.z;
       }
 }
 
@@ -163,29 +172,18 @@ __global__ void tpscudaVectorField(float* cudapointsx, float* cudapointsy, float
   int y = blockDim.y*blockIdx.y + threadIdx.y;
   int z = blockDim.z*blockIdx.z + threadIdx.z;
 
-  float newx = solutionx[0] + x*solutionx[1] + y*solutionx[2] + z*solutionx[3];
-  float newy = solutiony[0] + x*solutiony[1] + y*solutiony[2] + z*solutiony[3];
-  float newz = solutionz[0] + x*solutionz[1] + y*solutionz[2] + z*solutionz[3];
-
-  for (int i = 0; i < numofkeys; i++) {
-    float r = (x-keyx[i])*(x-keyx[i]) + (y-keyy[i])*(y-keyy[i]) + (z-keyz[i])*(z-keyz[i]);
-    if (r != 0.0) {
-      newx += r*log(r) * solutionx[i+4];
-      newy += r*log(r) * solutiony[i+4];
-      newz += r*log(r) * solutionz[i+4];
-    }
-  }
+  Point newPoint = calculateNewPoint(solutionx, solutiony, solutionz,
+                                     keyx, keyy, keyz, x, y, z, numofkeys);
 
   if (x <= width-1 && x >= 0)
     if (y <= height-1 && y >= 0)
       if (z <= slices-1 && z >= 0) {
-        cudapointsx[z*height*width+y*width+x] = newx - x;
-        cudapointsy[z*height*width+y*width+x] = newy - y;
-        cudapointsz[z*height*width+y*width+x] = newz - z;
+        cudapointsx[z*height*width+y*width+x] = newPoint.x - x;
+        cudapointsy[z*height*width+y*width+x] = newPoint.y - y;
+        cudapointsz[z*height*width+y*width+x] = newPoint.z - z;
       }
 }
 
-// Kernel definition
 short getPixel(int x, int y, int z, short* image, std::vector<int> dimensions) {
   if (x > dimensions[0]-1 || x < 0) return 0;
   if (y > dimensions[1]-1 || y < 0) return 0;
@@ -193,7 +191,6 @@ short getPixel(int x, int y, int z, short* image, std::vector<int> dimensions) {
   return image[z*dimensions[0]*dimensions[1]+y*dimensions[0]+x];
 }
 
-// Kernel definition
 short trilinearInterpolation(float x, float y, float z, short* image, std::vector<int> dimensions) {
   int u = trunc(x);
   int v = trunc(y);
@@ -221,22 +218,6 @@ short trilinearInterpolation(float x, float y, float z, short* image, std::vecto
   short result = c0*(1-zd)+c1*zd;
   if (result < 0) result = 0;
   return result;
-}
-
-void startTimeRecord(cudaEvent_t *start, cudaEvent_t *stop) {
-  checkCuda(cudaEventCreate(start));
-  checkCuda(cudaEventCreate(stop));
-  checkCuda(cudaEventRecord(*start, 0));
-}
-
-void showExecutionTime(cudaEvent_t *start, cudaEvent_t *stop, std::string output) {
-  checkCuda(cudaEventRecord(*stop, 0));
-  checkCuda(cudaEventSynchronize(*stop));
-  float elapsedTime;
-  checkCuda(cudaEventElapsedTime(&elapsedTime, *start, *stop));
-  checkCuda(cudaEventDestroy(*start));
-  checkCuda(cudaEventDestroy(*stop));
-  std::cout << output << elapsedTime/1000 << " s\n";
 }
 
 int getBlockSize(int maxBlockSize) {
