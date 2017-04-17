@@ -19,24 +19,33 @@ tps::Image tps::CudaTPS::run() {
     bool cpuInterpolation = GlobalConfiguration::getInstance().getBoolean("cpuInterpolation");
     bool checkError = GlobalConfiguration::getInstance().getBoolean("checkError");
     int blockSize = GlobalConfiguration::getInstance().getInt("blockSize");
+    bool radialDiff = GlobalConfiguration::getInstance().getBoolean("radialDiff");
     if (texture) {
         regImage = runTPSCUDAWithText(cm_, dimensions_,
                       referenceKeypoints_.size(), occupancy, twoDim, blockSize);
+        registredImage.setPixelVector(regImage);
     } else if (cpuInterpolation){
         regImage = runTPSCUDAWithoutInterpolation(cm_,
                       targetImage_.getPixelVector(), dimensions_,
                       referenceKeypoints_.size(), occupancy, twoDim, blockSize);
+        registredImage.setPixelVector(regImage);
     } else if (checkError) {
         regImage = runTPSCUDAVectorFieldTest(cm_, targetImage_.getPixelVector(),
                       dimensions_, referenceKeypoints_.size(), occupancy,
                       twoDim, blockSize);
+        registredImage.setPixelVector(regImage);
     } else {
         regImage = runTPSCUDA(cm_, dimensions_, referenceKeypoints_.size(),
                       occupancy, twoDim, blockSize);
+        registredImage.setPixelVector(regImage);
     }
 
+    if (radialDiff) {
+        runTPSRadialDiff(cm_, registredImage, referenceImage_, referenceKeypoints_,
+                         targetImage_, targetKeypoints_, occupancy, twoDim,
+                         blockSize);
+    }
 
-    registredImage.setPixelVector(regImage);
     delete(regImage);
     return registredImage;
 }

@@ -32,13 +32,20 @@ void tps::CudaMemory::allocCudaMemory(tps::Image& image) {
     bool texture = GlobalConfiguration::getInstance().getBoolean("imageTexture");
     bool cpuInterpolation = GlobalConfiguration::getInstance().getBoolean("cpuInterpolation");
     bool checkError = GlobalConfiguration::getInstance().getBoolean("checkError");
-    if (texture) {
+    bool radialDiff = GlobalConfiguration::getInstance().getBoolean("radialDiff");
+    if (radialDiff) {
         allocCudaImagePixelsTexture(image);
-    } if (cpuInterpolation || checkError) {
+    } else if (cpuInterpolation || checkError) {
         allocCudaImagePoints(image);
     } else {
         allocCudaImagePixels(image);
     }
+
+    if (radialDiff) {
+        allocCudaImagePoints(image);
+        allocCudaImagePixels(image);
+    }
+
     double time = timer.toc();
     std::cout << "Memory copy time: " << time << std::endl;
 }

@@ -13,10 +13,11 @@ class TPS {
 public:
     TPS(std::vector< std::vector<float> > referenceKeypoints,
         std::vector< std::vector<float> > targetKeypoints,
-        tps::Image targetImage) :
+        tps::Image targetImage, tps::Image referenceImage) :
             referenceKeypoints_(referenceKeypoints),
             targetKeypoints_(targetKeypoints),
             targetImage_(targetImage),
+            referenceImage_(referenceImage),
             dimensions_(targetImage.getDimensions()),
             registredImage(targetImage.getDimensions()) {};
 
@@ -35,6 +36,7 @@ protected:
 
     tps::Image targetImage_;
     tps::Image registredImage;
+    tps::Image referenceImage_;
     std::vector<int> dimensions_;
     std::vector<float> solutionX_;
     std::vector<float> solutionY_;

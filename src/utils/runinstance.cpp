@@ -99,19 +99,22 @@ void RunInstance::printInfo() {
 }
 
 Image RunInstance::executeBasicTps() {
-    BasicTPS basicTps(referenceKeypoints_, targetKeypoints_, targetImage_);
+    BasicTPS basicTps(referenceKeypoints_, targetKeypoints_, targetImage_,
+                      referenceImage_);
     basicTps.setLinearSystemSolutions(solutionX_, solutionY_, solutionZ_);
     return basicTps.run();
 }
 
 Image RunInstance::executeParallelTps() {
-    ParallelTPS parallelTps(referenceKeypoints_, targetKeypoints_, targetImage_);
+    ParallelTPS parallelTps(referenceKeypoints_, targetKeypoints_,
+                            targetImage_, referenceImage_);
     parallelTps.setLinearSystemSolutions(solutionX_, solutionY_, solutionZ_);
     return parallelTps.run();
 }
 
 Image RunInstance::executeCudaTps() {
-    CudaTPS cudaTps(referenceKeypoints_, targetKeypoints_, targetImage_);
+    CudaTPS cudaTps(referenceKeypoints_, targetKeypoints_, targetImage_,
+                    referenceImage_);
 
     std::string solverConfig = GlobalConfiguration::getInstance().getString("linearSystemSolver");
     if (solverConfig.compare("armadillo") == 0) {

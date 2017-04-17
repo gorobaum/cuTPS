@@ -9,6 +9,7 @@ checkError:true
 numberOfThreads:4
 blockSize:512
 resultImageMod:allOff
+radialDiff:false
 ../3dconfigurations/config3d1.tps
 ../3dconfigurations/config3d2.tps
 ../3dconfigurations/config3d3.tps

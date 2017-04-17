@@ -384,7 +384,9 @@ short* interpolateImage(short* imageVoxels, float* imagePointsX, float* imagePoi
   return regImage;
 }
 
-short* runTPSCUDAWithoutInterpolation(tps::CudaMemory cm, short* imageVoxels, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim, int blockSize) {
+short* runTPSCUDAWithoutInterpolation(tps::CudaMemory cm, short* imageVoxels,
+                    std::vector<int> dimensions, int numberOfCPs,
+                    bool occupancy, bool twoDim, int blockSize) {
   dim3 threadsPerBlock;
 
   if (occupancy) {
@@ -411,25 +413,25 @@ short* runTPSCUDAWithoutInterpolation(tps::CudaMemory cm, short* imageVoxels, st
   float* imagePointsY = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
   float* imagePointsZ = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
 
-  for (int slice = 0; slice < dimensions[2]; slice++)
-    for (int col = 0; col < dimensions[0]; col++)
-      for (int row = 0; row < dimensions[1]; row++) {
-        imagePointsX[slice*dimensions[1]*dimensions[0]+col*dimensions[1]+row] = 0;
-        imagePointsY[slice*dimensions[1]*dimensions[0]+col*dimensions[1]+row] = 0;
-        imagePointsZ[slice*dimensions[1]*dimensions[0]+col*dimensions[1]+row] = 0;
-      }
-
   cudaEvent_t start, stop;
   startTimeRecord(&start, &stop);
 
-  tpsCudaWithoutInterpolation<<<numBlocks, threadsPerBlock>>>(cm.getImagePointsX(), cm.getImagePointsY(), cm.getImagePointsZ(), cm.getSolutionX(), cm.getSolutionY(),
-      cm.getSolutionZ(), dimensions[0], dimensions[1], dimensions[2], cm.getKeypointX(),
-      cm.getKeypointY(), cm.getKeypointZ(), numberOfCPs);
+  tpsCudaWithoutInterpolation<<<numBlocks, threadsPerBlock>>>(
+      cm.getImagePointsX(), cm.getImagePointsY(), cm.getImagePointsZ(),
+      cm.getSolutionX(), cm.getSolutionY(),cm.getSolutionZ(), dimensions[0],
+      dimensions[1], dimensions[2], cm.getKeypointX(), cm.getKeypointY(),
+      cm.getKeypointZ(), numberOfCPs);
 
   checkCuda(cudaDeviceSynchronize());
-  checkCuda(cudaMemcpy(imagePointsX, cm.getImagePointsX(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float), cudaMemcpyDeviceToHost));
-  checkCuda(cudaMemcpy(imagePointsY, cm.getImagePointsY(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float), cudaMemcpyDeviceToHost));
-  checkCuda(cudaMemcpy(imagePointsZ, cm.getImagePointsZ(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float), cudaMemcpyDeviceToHost));
+  checkCuda(cudaMemcpy(imagePointsX, cm.getImagePointsX(),
+        dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
+        cudaMemcpyDeviceToHost));
+  checkCuda(cudaMemcpy(imagePointsY, cm.getImagePointsY(),
+        dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
+        cudaMemcpyDeviceToHost));
+  checkCuda(cudaMemcpy(imagePointsZ, cm.getImagePointsZ(),
+        dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
+        cudaMemcpyDeviceToHost));
 
   std::ostringstream oss;
   oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
@@ -577,3 +579,110 @@ short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
 
   return regImage;
 }
+
+float radialDiff(tps::Image imageA, std::vector<std::vector<float> > keypointsA,
+    tps::Image imageB, std::vector<std::vector<float> > keypointsB) {
+  float diff = 0.0;
+  int r = 2;
+  for (int i = 0; i < keypointsA.size(); i++) {
+    float radialA = imageA.radialSum(r, keypointsA[i]);
+    float radialB = imageB.radialSum(r, keypointsB[i]);
+    diff += (radialA-radialB)*(radialA-radialB);
+  }
+  diff /= keypointsA.size();
+  return diff;
+}
+
+std::vector<std::vector<float> > applyVectorField(
+    std::vector<std::vector<float> > keypoints, float* vectorFieldX,
+    float* vectorFieldY, float* vectorFieldZ, std::vector<int> dimensions) {
+  std::vector<std::vector<float> > newKeypoints;
+
+  for (int i = 0; i < keypoints.size(); i++) {
+    int x = keypoints[i][0];
+    int y = keypoints[i][1];
+    int z = keypoints[i][2];
+    int pos = z*dimensions[0]*dimensions[1]+y*dimensions[0]+z;
+    std::vector<float> newKeypoint;
+    newKeypoint.push_back(keypoints[i][0] + vectorFieldX[pos]);
+    newKeypoint.push_back(keypoints[i][1] + vectorFieldY[pos]);
+    newKeypoint.push_back(keypoints[i][2] + vectorFieldZ[pos]);
+
+    newKeypoints.push_back(newKeypoint);
+  }
+
+  return newKeypoints;
+}
+
+void runTPSRadialDiff(tps::CudaMemory cm, tps::Image regImage,
+    tps::Image referenceImage, std::vector<std::vector<float> >referenceKeypoints,
+    tps::Image targetImage, std::vector<std::vector<float> > targetKeypoints,
+    bool occupancy, bool twoDim, int blockSize) {
+  std::vector<int> dimensions = referenceImage.getDimensions();
+  int numberOfCPs = targetKeypoints.size();
+  dim3 threadsPerBlock;
+
+  if (occupancy) {
+    int maxBlockSize = getBlockSize(blockSize);
+    threadsPerBlock = calculateBestThreadsPerBlock(maxBlockSize, twoDim);
+  } else {
+    threadsPerBlock.x = 8;
+    threadsPerBlock.y = 8;
+    if (twoDim) {
+      threadsPerBlock.z = 1;
+    } else {
+      threadsPerBlock.z = 8;
+    }
+  }
+
+  dim3 numBlocks(std::ceil(1.0*dimensions[0]/threadsPerBlock.x),
+      std::ceil(1.0*dimensions[1]/threadsPerBlock.y),
+      std::ceil(1.0*dimensions[2]/threadsPerBlock.z));
+
+  float* vectorFieldX = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
+  float* vectorFieldY = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
+  float* vectorFieldZ = (float*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float));
+
+  cudaEvent_t start, stop;
+  startTimeRecord(&start, &stop);
+
+  tpsCudaWithoutInterpolation<<<numBlocks, threadsPerBlock>>>(
+      cm.getImagePointsX(), cm.getImagePointsY(), cm.getImagePointsZ(),
+      cm.getSolutionX(), cm.getSolutionY(),cm.getSolutionZ(), dimensions[0],
+      dimensions[1], dimensions[2], cm.getKeypointX(), cm.getKeypointY(),
+      cm.getKeypointZ(), numberOfCPs);
+
+  checkCuda(cudaDeviceSynchronize());
+  checkCuda(cudaMemcpy(vectorFieldX, cm.getImagePointsX(),
+        dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
+        cudaMemcpyDeviceToHost));
+  checkCuda(cudaMemcpy(vectorFieldY, cm.getImagePointsY(),
+        dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
+        cudaMemcpyDeviceToHost));
+  checkCuda(cudaMemcpy(vectorFieldZ, cm.getImagePointsZ(),
+        dimensions[0]*dimensions[1]*dimensions[2]*sizeof(float),
+        cudaMemcpyDeviceToHost));
+
+  std::ostringstream oss;
+  oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
+
+  showExecutionTime(&start, &stop, oss.str());
+
+  arma::wall_clock timer;
+  timer.tic();
+  std::vector<std::vector<float> > resultKeypoints =
+    applyVectorField(targetKeypoints, vectorFieldX, vectorFieldY,
+                     vectorFieldZ, dimensions);
+
+  float diffRefTar = radialDiff(referenceImage, referenceKeypoints,
+                                targetImage, targetKeypoints);
+  float diffRefRes = radialDiff(referenceImage, referenceKeypoints,
+                                regImage, resultKeypoints);
+  double time = timer.toc();
+  std::cout << "Calculate error execution time(" << numberOfCPs << "): " << time << "s" << std::endl;
+  std::cout << "Radial diff Ref Tar (" << numberOfCPs << ") = " << diffRefTar << std::endl;
+  std::cout << "Radial diff Ref Reg (" << numberOfCPs << ") = " << diffRefRes << std::endl;
+
+
+}
+

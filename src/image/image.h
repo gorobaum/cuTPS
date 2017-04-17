@@ -32,6 +32,7 @@ namespace tps {
       short getPixelAt(int x, int y, int z);
       Image createSubtractionImageFrom(Image sub);
       short NNInterpolation(float x, float y, float z);
+      float radialSum(int r, std::vector<float> point);
       void changePixelAt(int x, int y, int z, short value);
       short trilinearInterpolation(float x, float y, float z);
       std::vector<int> getDimensions() { return dimensions_; };

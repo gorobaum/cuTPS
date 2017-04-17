@@ -124,3 +124,16 @@ void tps::Image::setPixelVector(short* vector) {
         changePixelAt(x, y, z, newValue);
       }
 }
+
+float tps::Image::radialSum(int r, std::vector<float> point) {
+  float sum = 0.0;
+  int cX = point[0];
+  int cY = point[1];
+  int cZ = point[2];
+  for (int x = (cX-r); x < (cX+r); x++)
+    for (int y = (cY-r); y < (cY+r); y++)
+      for (int z = (cZ-r); z < (cZ+r); z++) {
+        sum += 1.0*getPixelAt(x, y, z);
+      }
+  return sum;
+}

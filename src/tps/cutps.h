@@ -24,4 +24,9 @@ short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
                                       int numberOfCPs, bool occupancy,
                                       bool twoDim, int blockSize);
 
+void runTPSRadialDiff(tps::CudaMemory cm, tps::Image regImage,
+    tps::Image referenceImage, std::vector<std::vector<float> >referenceKeypoints,
+    tps::Image targetImage, std::vector<std::vector<float> > targetKeypoints,
+    bool occupancy, bool twoDim, int blockSize);
+
 #endif
