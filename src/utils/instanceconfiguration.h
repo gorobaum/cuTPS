@@ -19,6 +19,8 @@ public:
     bool isCallFeatureGenerator();
     float getFloat(std::string configurationName);
     std::string getString(std::string configurationName);
+    bool hasConfiguration(std::string configurationName);
+    std::vector<int> getIntVector(std::string configurationName);
     std::vector<std::vector<float>> getFloatVector(std::string configurationName);
 
 private:

@@ -583,11 +583,11 @@ short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
 float radialDiff(tps::Image imageA, std::vector<std::vector<float> > keypointsA,
     tps::Image imageB, std::vector<std::vector<float> > keypointsB) {
   float diff = 0.0;
-  int r = 2;
+  int r = 3;
   for (int i = 0; i < keypointsA.size(); i++) {
     float radialA = imageA.radialSum(r, keypointsA[i]);
     float radialB = imageB.radialSum(r, keypointsB[i]);
-    diff += (radialA-radialB)*(radialA-radialB);
+    diff += (radialA-radialB);
   }
   diff /= keypointsA.size();
   return diff;

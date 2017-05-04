@@ -35,6 +35,8 @@ private:
     void loadKeypoints();
     void generateKeypoints();
     void generateKeypointImage();
+    void calculateMSE(Image result);
+    void generateDiffImage(Image result, std::string resultImage);
 
     void allocateGpuMemory();
     void solveLinearSystemWithCuda();

@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "utils/instanceconfiguration.h"
+
 void tps::Image::changePixelAt(int x, int y, int z, short value) {
   if (x >= 0 && x < dimensions_[0]-1 && y >= 0 && y < dimensions_[1]-1 && z >= 0 && z <= dimensions_[2]-1) {
     image[x+y*dimensions_[0]+z*dimensions_[0]*dimensions_[1]] = value;
@@ -67,12 +69,25 @@ short tps::Image::trilinearInterpolation(float x, float y, float z) {
   return newValue;
 }
 
-
 tps::Image tps::Image::createSubtractionImageFrom(Image sub) {
   tps::Image result(dimensions_);
   for (int x = 0; x < dimensions_[0]; x++)
     for (int y = 0; y < dimensions_[1]; y++)
       for (int z = 0; z < dimensions_[2]; z++) {
+        short subVoxel = sub.getPixelAt(x, y, z);
+        short thisVoxel = getPixelAt(x, y, z);
+        short resultVoxel = std::abs(subVoxel - thisVoxel);
+        result.changePixelAt(x, y, z, resultVoxel);
+      }
+  return result;
+}
+
+tps::Image tps::Image::createSubtractionImageFromWithRegion(Image sub,
+    std::vector<int> region) {
+  tps::Image result(dimensions_);
+  for (int x = region[0]; x < region[1]; x++)
+    for (int y = region[2]; y < region[3]; y++)
+      for (int z = region[4]; z < region[5]; z++) {
         short subVoxel = sub.getPixelAt(x, y, z);
         short thisVoxel = getPixelAt(x, y, z);
         short resultVoxel = std::abs(subVoxel - thisVoxel);
@@ -94,6 +109,22 @@ float tps::Image::meanSquaredError(Image sub) {
   mse /= dimensions_[0]*dimensions_[1]*dimensions_[2];
   return mse;
 }
+
+float tps::Image::meanSquaredErrorWithRegion(Image sub,
+    std::vector<int> region) {
+  float mse = 0.0;
+  for (int x = region[0]; x < region[1]; x++)
+    for (int y = region[2]; y < region[3]; y++)
+      for (int z = region[4]; z < region[5]; z++) {
+        short subVoxel = sub.getPixelAt(x, y, z);
+        short thisVoxel = getPixelAt(x, y, z);
+        float diff = 1.0*(subVoxel - thisVoxel);
+        mse += diff*diff;
+      }
+  mse /= dimensions_[0]*dimensions_[1]*dimensions_[2];
+  return mse;
+}
+
 
 short tps::Image::NNInterpolation(float x, float y, float z) {
   int nearX = getNearestInteger(x);

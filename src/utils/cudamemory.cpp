@@ -33,7 +33,7 @@ void tps::CudaMemory::allocCudaMemory(tps::Image& image) {
     bool cpuInterpolation = GlobalConfiguration::getInstance().getBoolean("cpuInterpolation");
     bool checkError = GlobalConfiguration::getInstance().getBoolean("checkError");
     bool radialDiff = GlobalConfiguration::getInstance().getBoolean("radialDiff");
-    if (radialDiff) {
+    if (texture) {
         allocCudaImagePixelsTexture(image);
     } else if (cpuInterpolation || checkError) {
         allocCudaImagePoints(image);
