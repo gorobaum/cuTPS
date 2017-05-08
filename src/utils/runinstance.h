@@ -35,7 +35,7 @@ private:
     void loadKeypoints();
     void generateKeypoints();
     void generateKeypointImage();
-    void calculateMSE(Image result);
+    void calculateMSE(Image result, std::string resultImage);
     void generateDiffImage(Image result, std::string resultImage);
 
     void allocateGpuMemory();

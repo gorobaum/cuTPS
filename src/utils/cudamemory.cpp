@@ -204,7 +204,7 @@ double tps::CudaMemory::memoryEstimation() {
   if (cpuInterpolation) {
     pixelsMemory = 3.0*imageSize*floatSize/(1024*1024);
   } else {
-    pixelsMemory = 2.0*imageSize*ucharSize/(1024*1024);
+    pixelsMemory = 2.0*imageSize*floatSize/(1024*1024);
   }
 
   // std::cout << "pixelsMemory = " << pixelsMemory << std::endl;

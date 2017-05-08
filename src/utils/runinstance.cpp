@@ -83,7 +83,7 @@ namespace tps {
 
     isDone_ = true;
 
-    calculateMSE(result);
+    calculateMSE(result, resultImage);
 
     if (GlobalConfiguration::getInstance().isCuda())
       cudaMemory_.freeMemory();
@@ -100,11 +100,9 @@ namespace tps {
     imageHandler_->saveImageData(subImage, resultImage+"_sub_");
   }
 
-  void RunInstance::calculateMSE(Image result) {
+  void RunInstance::calculateMSE(Image result, std::string resultImage) {
     float refTarMSE, refResMES;
     bool hasRegion = instanceConfiguration_.hasConfiguration("region");
-    instanceConfiguration_.printConfigs();
-    std::cout << hasRegion << std::endl;
     if (hasRegion) {
       std::vector<int> region = instanceConfiguration_.getIntVector("region");
       refTarMSE = referenceImage_.meanSquaredErrorWithRegion(targetImage_, region);
@@ -113,9 +111,9 @@ namespace tps {
       refTarMSE = referenceImage_.meanSquaredError(targetImage_);
       refResMES = referenceImage_.meanSquaredError(result);
     }
-    std::cout << "MSE for Ref Tar(" << solutionX_.size() << ") = "
+    std::cout << "MSE for Ref Tar(" << resultImage << ") = "
       << refTarMSE << std::endl;
-    std::cout << "MSE for Ref Res(" << solutionX_.size() << ") = "
+    std::cout << "MSE for Ref Res(" << resultImage << ") = "
       << refResMES << std::endl;
   }
 

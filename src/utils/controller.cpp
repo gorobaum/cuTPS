@@ -15,7 +15,7 @@ namespace tps {
 
   void Controller::exec() {
     bool isCuda = GlobalConfiguration::getInstance().isCuda();
-    double totalGpuMemory = CudaMemory::getGpuMemory() * 0.9;
+    double totalGpuMemory = CudaMemory::getGpuMemory() * 0.8;
     std::vector<RunInstance> loadedInstances;
 
     // GlobalConfiguration::getInstance().printConfigs();
