@@ -148,6 +148,8 @@ namespace tps {
       cudaMemory_.setSolutionZ(solutionZ_);
     }
     cudaTps.setCudaMemory(cudaMemory_);
+    std::string resultImage = instanceConfiguration_.getString("resultImage");
+    cudaTps.setModifier(resultImage);
 
     return cudaTps.run();
   }
@@ -157,7 +159,9 @@ namespace tps {
     CudaLinearSystems cudaLinearSystems(referenceKeypoints_, targetKeypoints_,
         isTwoDimensional);
 
-    cudaLinearSystems.solveLinearSystems(cudaMemory_);
+    std::string resultImage = instanceConfiguration_.getString("resultImage");
+
+    cudaLinearSystems.solveLinearSystems(cudaMemory_, resultImage);
 
     solutionX_ = cudaLinearSystems.getSolutionX();
     solutionY_ = cudaLinearSystems.getSolutionY();
@@ -204,5 +208,8 @@ namespace tps {
     return imageHandler_->loadImageData(imagePath);
   }
 
+  std::string RunInstance::getImageName() {
+    return instanceConfiguration_.getString("resultImage");
+  }
 
 } //namespace

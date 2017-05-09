@@ -27,6 +27,7 @@ public:
     void executeTps();
     void allocCudaMemory();
     void solveLinearSystem();
+    std::string getImageName();
 
     bool isDone() {return isDone_;};
     double getEstimateGpuMemory();

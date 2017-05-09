@@ -276,7 +276,7 @@ dim3 calculateBestThreadsPerBlock(int blockSize, bool twoDim) {
   return threadsPerBlock;
 }
 
-short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim, int blockSize) {
+short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim, int blockSize, std::string mod) {
   dim3 threadsPerBlock;
 
   if (occupancy) {
@@ -316,13 +316,13 @@ short* runTPSCUDA(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfC
   checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
 
   std::ostringstream oss;
-  oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
+  oss << "callKernel execution time for(" << mod << ")= ";
 
   showExecutionTime(&start, &stop, oss.str());
   return regImage;
 }
 
-short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim, int blockSize) {
+short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int numberOfCPs, bool occupancy, bool twoDim, int blockSize, std::string mod) {
   dim3 threadsPerBlock;
 
   if (occupancy) {
@@ -362,7 +362,7 @@ short* runTPSCUDAWithText(tps::CudaMemory cm, std::vector<int> dimensions, int n
   checkCuda(cudaMemcpy(regImage, cm.getRegImage(), dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short), cudaMemcpyDeviceToHost));
 
   std::ostringstream oss;
-  oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
+  oss << "callKernel execution time with sysDim(" << mod << ")= ";
 
   showExecutionTime(&start, &stop, oss.str());
   return regImage;
@@ -386,7 +386,7 @@ short* interpolateImage(short* imageVoxels, float* imagePointsX, float* imagePoi
 
 short* runTPSCUDAWithoutInterpolation(tps::CudaMemory cm, short* imageVoxels,
                     std::vector<int> dimensions, int numberOfCPs,
-                    bool occupancy, bool twoDim, int blockSize) {
+                    bool occupancy, bool twoDim, int blockSize, std::string mod) {
   dim3 threadsPerBlock;
 
   if (occupancy) {
@@ -434,7 +434,7 @@ short* runTPSCUDAWithoutInterpolation(tps::CudaMemory cm, short* imageVoxels,
         cudaMemcpyDeviceToHost));
 
   std::ostringstream oss;
-  oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
+  oss << "callKernel execution time with sysDim(" << mod << ")= ";
 
   showExecutionTime(&start, &stop, oss.str());
 
@@ -442,7 +442,7 @@ short* runTPSCUDAWithoutInterpolation(tps::CudaMemory cm, short* imageVoxels,
   timer.tic();
   short* regImage = interpolateImage(imageVoxels, imagePointsX, imagePointsY, imagePointsZ, dimensions);
   double time = timer.toc();
-  std::cout << "Interpolation execution time(" << numberOfCPs << "): " << time << "s" << std::endl;
+  std::cout << "Interpolation execution time(" << mod << "): " << time << "s" << std::endl;
 
   return regImage;
 }
@@ -500,7 +500,7 @@ float calculateError(float *vectorFieldX, float* vectorFieldY,
 short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
     std::vector<int> dimensions,
     int numberOfCPs, bool occupancy,
-    bool twoDim, int blockSize) {
+    bool twoDim, int blockSize, std::string mod) {
   dim3 threadsPerBlock;
 
   if (occupancy) {
@@ -556,7 +556,7 @@ short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
         cudaMemcpyDeviceToHost));
 
   std::ostringstream oss;
-  oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
+  oss << "callKernel execution time with sysDim(" << mod << ")= ";
 
   showExecutionTime(&start, &stop, oss.str());
 
@@ -565,9 +565,9 @@ short* runTPSCUDAVectorFieldTest(tps::CudaMemory cm, short* imageVoxels,
   float error = calculateError(vectorFieldX, vectorFieldY, vectorFieldZ, dimensions);
   float sd = calculateSD(error, vectorFieldX, vectorFieldY, vectorFieldZ, dimensions);
   double time = timer.toc();
-  std::cout << "Calculate error execution time(" << numberOfCPs << "): " << time << "s" << std::endl;
-  std::cout << "Error for (" << numberOfCPs << ") = " << error << std::endl;
-  std::cout << "SD for (" << numberOfCPs << ") = " << sd << std::endl;
+  std::cout << "Calculate error execution time(" << mod << "): " << time << "s" << std::endl;
+  std::cout << "Error for (" << mod << ") = " << error << std::endl;
+  std::cout << "SD for (" << mod << ") = " << sd << std::endl;
 
   short* regImage = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
 
@@ -617,7 +617,7 @@ std::vector<std::vector<float> > applyVectorField(
 void runTPSRadialDiff(tps::CudaMemory cm, tps::Image regImage,
     tps::Image referenceImage, std::vector<std::vector<float> >referenceKeypoints,
     tps::Image targetImage, std::vector<std::vector<float> > targetKeypoints,
-    bool occupancy, bool twoDim, int blockSize) {
+    bool occupancy, bool twoDim, int blockSize, std::string mod) {
   std::vector<int> dimensions = referenceImage.getDimensions();
   int numberOfCPs = targetKeypoints.size();
   dim3 threadsPerBlock;
@@ -664,7 +664,7 @@ void runTPSRadialDiff(tps::CudaMemory cm, tps::Image regImage,
         cudaMemcpyDeviceToHost));
 
   std::ostringstream oss;
-  oss << "callKernel execution time with sysDim(" << numberOfCPs << ")= ";
+  oss << "callKernel execution time with sysDim(" << mod << ")= ";
 
   showExecutionTime(&start, &stop, oss.str());
 
@@ -679,9 +679,9 @@ void runTPSRadialDiff(tps::CudaMemory cm, tps::Image regImage,
   float diffRefRes = radialDiff(referenceImage, referenceKeypoints,
                                 regImage, resultKeypoints);
   double time = timer.toc();
-  std::cout << "Calculate error execution time(" << numberOfCPs << "): " << time << "s" << std::endl;
-  std::cout << "Radial diff Ref Tar (" << numberOfCPs << ") = " << diffRefTar << std::endl;
-  std::cout << "Radial diff Ref Reg (" << numberOfCPs << ") = " << diffRefRes << std::endl;
+  std::cout << "Calculate error execution time(" << mod << "): " << time << "s" << std::endl;
+  std::cout << "Radial diff Ref Tar (" << mod << ") = " << diffRefTar << std::endl;
+  std::cout << "Radial diff Ref Reg (" << mod << ") = " << diffRefRes << std::endl;
 
 
 }

@@ -9,8 +9,8 @@ namespace tps {
 class CudaLinearSystems : public CPLinearSystems {
 using CPLinearSystems::CPLinearSystems;
 public:
-  void solveLinearSystems(tps::CudaMemory& cm);
-  
+  void solveLinearSystems(tps::CudaMemory& cm, std::string mod);
+
 private:
   void solveLinearSystem(double *B, std::vector<float>& solution);
   std::vector<float> pointerToVector(double *pointer);
@@ -18,6 +18,7 @@ private:
   void transferBs();
   void freeResources();
   double *CLSbx, *CLSby, *CLSbz, *CLSA;
+  std::string mod_;
 };
 
 } //namepsace

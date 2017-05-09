@@ -9,36 +9,40 @@ struct ThreadData {
   std::vector<tps::RunInstance> executionInstances;
 };
 
-#define MAXRUNNINGINSTANCES 16
+#define MAXRUNNINGINSTANCES 4
 
 namespace tps {
 
   void Controller::exec() {
     bool isCuda = GlobalConfiguration::getInstance().isCuda();
-    double totalGpuMemory = CudaMemory::getGpuMemory() * 0.8;
+    double totalGpuMemory = CudaMemory::getGpuMemory() * 0.7;
     std::vector<RunInstance> loadedInstances;
 
     // GlobalConfiguration::getInstance().printConfigs();
 
     while (lastInstaceLoaded_ < runInstances_.size()) {
       for (lastInstaceLoaded_; lastInstaceLoaded_ < runInstances_.size(); lastInstaceLoaded_++) {
+        if ((lastInstaceLoaded_ - lastInstanceExecuted_) >= MAXRUNNINGINSTANCES) break;
         runInstances_[lastInstaceLoaded_].loadData();
         if (isCuda) {
           double currentUsedMemory = CudaMemory::getUsedGpuMemory();
           double estimatedMemory = runInstances_[lastInstaceLoaded_].getEstimateGpuMemory();
+          std::string imageName = runInstances_[lastInstaceLoaded_].getImageName();
+          std::cout << "Allocating memory for " << imageName << std::endl;
+          std::cout << "Total GPU memory = " << totalGpuMemory << std::endl;
+          std::cout << "Current GPU memory = " << currentUsedMemory << std::endl;
           std::cout << "Estimated GPU memory = " << estimatedMemory << std::endl;
           if (estimatedMemory > totalGpuMemory) {
             std::cout << "GPU memory isn't big enough!" << std::endl;
             exit(-1);
           }
-          currentUsedMemory += estimatedMemory;
+          estimatedMemory += currentUsedMemory;
           if (estimatedMemory < totalGpuMemory) {
             runInstances_[lastInstaceLoaded_].allocCudaMemory();
           } else {
             break;
           }
         }
-        if ((lastInstaceLoaded_ - lastInstanceExecuted_) > MAXRUNNINGINSTANCES) break;
       }
 
       runLoadedInstances();
@@ -83,6 +87,7 @@ namespace tps {
         fprintf(stderr, "Error joining thread");
       }
     }
+    lastInstanceExecuted_ = lastInstaceLoaded_;
   }
 
   void Controller::runThread(void* data) {

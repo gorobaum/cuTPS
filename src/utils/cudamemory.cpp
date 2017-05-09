@@ -173,10 +173,10 @@ std::vector<float> tps::CudaMemory::cudaToHost(float *cudaMemory) {
 }
 
 double tps::CudaMemory::getGpuMemory() {
-    size_t avail;
-    size_t total;
-    cudaMemGetInfo( &avail, &total );
-    return total/(1024*1024);
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0);
+    size_t gpuGlobalMem = deviceProp.totalGlobalMem;
+    return static_cast<double>(gpuGlobalMem/(1024.0*1024.0));
 }
 
 double tps::CudaMemory::getUsedGpuMemory() {

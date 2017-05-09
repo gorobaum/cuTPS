@@ -14,8 +14,10 @@ public:
 
     tps::Image run();
     void setCudaMemory(tps::CudaMemory cm);
+    void setModifier(std::string mod) { mod_ = mod; }
 
 private:
+    std::string mod_;
     tps::CudaMemory cm_;
 };
 
