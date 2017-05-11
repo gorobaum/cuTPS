@@ -15,7 +15,7 @@ namespace tps {
 
   void Controller::exec() {
     bool isCuda = GlobalConfiguration::getInstance().isCuda();
-    double totalGpuMemory = CudaMemory::getGpuMemory() * 0.7;
+    double totalGpuMemory = CudaMemory::getGpuMemory() * 0.9;
     std::vector<RunInstance> loadedInstances;
 
     // GlobalConfiguration::getInstance().printConfigs();
@@ -34,7 +34,7 @@ namespace tps {
           std::cout << "Estimated GPU memory = " << estimatedMemory << std::endl;
           if (estimatedMemory > totalGpuMemory) {
             std::cout << "GPU memory isn't big enough!" << std::endl;
-            exit(-1);
+            break;
           }
           estimatedMemory += currentUsedMemory;
           if (estimatedMemory < totalGpuMemory) {
@@ -58,6 +58,8 @@ namespace tps {
     } else {
       runSingleProcess();
     }
+    cudaDeviceReset();
+    cudaThreadExit();
   }
 
   void Controller::runSingleProcess() {

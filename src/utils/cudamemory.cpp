@@ -222,9 +222,13 @@ void tps::CudaMemory::freeMemory() {
   cudaFree(solutionX);
   cudaFree(solutionY);
   cudaFree(solutionZ);
+  cudaFree(imagePointsX);
+  cudaFree(imagePointsY);
+  cudaFree(imagePointsZ);
   cudaFree(keypointX);
   cudaFree(keypointY);
   cudaFree(keypointZ);
+  cudaFree(cuArray);
   cudaFree(targetImage);
   cudaFree(regImage);
 }
