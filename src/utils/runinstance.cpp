@@ -13,6 +13,7 @@ namespace tps {
 
   void RunInstance::loadData() {
     targetImage_ = loadImageData("targetImage");
+    std::cout << targetImage_.getPixelVector()[0] << std::endl;
     loadKeypoints();
 
     if (GlobalConfiguration::getInstance().isCuda()) {
@@ -184,6 +185,7 @@ namespace tps {
     Image result(referenceImage_.getDimensions());
 
     short* pagode = targetImage_.getPixelVector();
+    std::cout << pagode[0] << std::endl;
     result.setPixelVector(pagode);
 
     for (int i = 0; i < targetKeypoints_.size(); i++) {
@@ -205,7 +207,9 @@ namespace tps {
 
   Image RunInstance::loadImageData(std::string configString) {
     std::string imagePath = instanceConfiguration_.getString(configString);
-    return imageHandler_->loadImageData(imagePath);
+    Image img = imageHandler_->loadImageData(imagePath);
+    std::cout << img.getPixelVector()[0] << std::endl;
+    return img;
   }
 
   std::string RunInstance::getImageName() {

@@ -32,8 +32,6 @@ tps::Image tps::ITKImageHandler::loadImageData(std::string filename) {
     dimensions.push_back(imageIO->GetDimensions(i));
   }
 
-  short* vecImage = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
-
   tps::Image newImage(dimensions);
 
   while(!imageIterator.IsAtEnd()){
