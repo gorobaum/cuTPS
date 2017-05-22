@@ -19,6 +19,7 @@ cuda_add_executable(tps
   src/feature/featuregenerator.cpp
 
   src/image/image.cpp
+  src/image/imagedata.cpp
   src/image/itkimagehandler.cpp
   src/image/opcvimagehandler.cpp
   src/image/imagedeformation.cpp

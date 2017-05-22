@@ -6,7 +6,8 @@
 
 void tps::Image::changePixelAt(int x, int y, int z, short value) {
   if (x >= 0 && x < dimensions_[0]-1 && y >= 0 && y < dimensions_[1]-1 && z >= 0 && z <= dimensions_[2]-1) {
-    image[x+y*dimensions_[0]+z*dimensions_[0]*dimensions_[1]] = value;
+    int pos = x+y*dimensions_[0]+z*dimensions_[0]*dimensions_[1];
+    image->changePixelAt(pos, value);
   }
 }
 
@@ -42,7 +43,8 @@ short tps::Image::getPixelAt(int x, int y, int z) {
   else if (z > dimensions_[2]-1 || z < 0)
     return 0;
   else {
-    return image[x+y*dimensions_[0]+z*dimensions_[0]*dimensions_[1]];
+    int pos = x+y*dimensions_[0]+z*dimensions_[0]*dimensions_[1];
+    return image->getPixelAt(pos);
   }
 }
 
@@ -135,15 +137,17 @@ short tps::Image::NNInterpolation(float x, float y, float z) {
 }
 
 short* tps::Image::getPixelVector() {
-  return image;
+  return image->getPixelVector();
 }
 
 float* tps::Image::getFloatPixelVector() {
   float* vector = (float*)malloc(dimensions_[0]*dimensions_[1]*dimensions_[2]*sizeof(float));
   for (int x = 0; x < dimensions_[0]; x++)
     for (int y = 0; y < dimensions_[1]; y++)
-      for (int z = 0; z < dimensions_[2]; z++)
-        vector[z*dimensions_[0]*dimensions_[1]+y*dimensions_[0]+x] = image[z*dimensions_[0]*dimensions_[1]+y*dimensions_[0]+x];
+      for (int z = 0; z < dimensions_[2]; z++) {
+        int pos = z*dimensions_[0]*dimensions_[1]+y*dimensions_[0]+x;
+        vector[pos] = image->getPixelAt(pos);
+      }
   return vector;
 }
 

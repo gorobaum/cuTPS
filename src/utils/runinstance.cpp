@@ -208,7 +208,6 @@ namespace tps {
   Image RunInstance::loadImageData(std::string configString) {
     std::string imagePath = instanceConfiguration_.getString(configString);
     Image img = imageHandler_->loadImageData(imagePath);
-    std::cout << img.getPixelVector()[0] << std::endl;
     return img;
   }
 

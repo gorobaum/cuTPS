@@ -7,6 +7,8 @@
 #include <memory>
 #include <iostream>
 
+#include "imagedata.h"
+
 namespace tps {
 
   class Image {
@@ -15,43 +17,46 @@ namespace tps {
         dimensions_.push_back(0);
         dimensions_.push_back(0);
         dimensions_.push_back(0);
-        image = NULL;
+        image = new ImageData(dimensions_);
       };
       Image(short* matImage, std::vector<int> dimensions) :
         dimensions_(dimensions) {
-          image = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
+          image = new ImageData(dimensions);
           for (int i = 0; i < dimensions[0]*dimensions[1]*dimensions[2]; i++)
-            image[i] = matImage[i];
+            image->changePixelAt(i, matImage[i]);
         }
       Image(std::vector<int> dimensions) :
         dimensions_(dimensions) {
-          image = (short*)malloc(dimensions[0]*dimensions[1]*dimensions[2]*sizeof(short));
+          image = new ImageData(dimensions);
           for (int i = 0; i < dimensions[0]*dimensions[1]*dimensions[2]; i++)
-            image[i] = 0;
+            image->changePixelAt(i, 0);
         }
       Image(const Image &obj) {
         dimensions_ = obj.dimensions_;
-        if (!obj.dimensions_.empty()) {
-          image = (short*)malloc(dimensions_[0]*dimensions_[1]*dimensions_[2]*sizeof(short));
-          if (obj.image) {
-            for (int i = 0; i < dimensions_[0]*dimensions_[1]*dimensions_[2]; i++)
-              image[i] = obj.image[i];
-          }
+        if (obj.image != NULL) {
+          image = obj.image;
+          image->addReference();
         }
       }
       Image& operator=(const Image& obj) {
         dimensions_ = obj.dimensions_;
-        if (!obj.dimensions_.empty()) {
-          image = (short*)malloc(dimensions_[0]*dimensions_[1]*dimensions_[2]*sizeof(short));
-          if (obj.image) {
-            for (int i = 0; i < dimensions_[0]*dimensions_[1]*dimensions_[2]; i++)
-              image[i] = obj.image[i];
-          }
+        if (image != NULL)
+          image->removeReference();
+        if (obj.image != NULL) {
+          image = obj.image;
+          image->addReference();
         }
 
         return *this;
       }
-      ~Image() { if (image) delete(image); }
+      ~Image() {
+        if (image != NULL) {
+          if (image->getCount() == 1)
+            delete image;
+          else
+            image->removeReference();
+        }
+      }
 
       bool isTwoDimensional();
       int numberOfDimension();
@@ -71,8 +76,10 @@ namespace tps {
       Image createSubtractionImageFromWithRegion(Image sub,
           std::vector<int> region);
 
+      int getCount() {return image->getCount(); }
+
     private:
-      short* image;
+      ImageData* image;
       std::vector<int> dimensions_;
       int getNearestInteger(float number) {
         if ((number - std::floor(number)) <= 0.5) return std::floor(number);

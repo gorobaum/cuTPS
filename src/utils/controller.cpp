@@ -9,7 +9,7 @@ struct ThreadData {
   std::vector<tps::RunInstance> executionInstances;
 };
 
-#define MAXRUNNINGINSTANCES 4
+#define MAXRUNNINGINSTANCES 2
 
 namespace tps {
 
