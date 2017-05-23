@@ -1,0 +1,13 @@
+referenceImage:../images/real/niftis/60.nii.gz
+linearSystemSolver:cuda
+tps:cuda
+calculateOccupancy:true
+parallelExecution:true
+imageTexture:true
+cpuInterpolation:false
+checkError:false
+radialDiff:true
+numberOfThreads:4
+blockSize:512
+resultImageMod:allOn
+../realConfig/config90.txt
