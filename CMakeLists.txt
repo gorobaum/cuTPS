@@ -11,7 +11,9 @@ include(${ITK_USE_FILE})
 
 include_directories(src "${ARMADILLO_INCLUDE_DIRS}")
 
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xptxas -v -Xcompiler -std=c++98")
+LIST(APPEND CUDA_NVCC_FLAGS "-Xcompiler -std=c++98")
+
+SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
 cuda_add_executable(tps
   src/main.cpp

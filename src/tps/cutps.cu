@@ -593,7 +593,7 @@ float radialDiff(tps::Image imageA, std::vector<std::vector<float> > keypointsA,
   return diff;
 }
 
-std::vector<std::vector<float> > applyVectorField(
+/*std::vector<std::vector<float> > applyVectorField(
     std::vector<std::vector<float> > keypoints, float* vectorFieldX,
     float* vectorFieldY, float* vectorFieldZ, std::vector<int> dimensions) {
   std::vector<std::vector<float> > newKeypoints;
@@ -612,7 +612,7 @@ std::vector<std::vector<float> > applyVectorField(
   }
 
   return newKeypoints;
-}
+}*/
 
 void runTPSRadialDiff(tps::CudaMemory cm, tps::Image regImage,
     tps::Image referenceImage, std::vector<std::vector<float> >referenceKeypoints,
@@ -670,7 +670,7 @@ void runTPSRadialDiff(tps::CudaMemory cm, tps::Image regImage,
 
   arma::wall_clock timer;
   timer.tic();
-  std::vector<std::vector<float> > resultKeypoints =
+  /*std::vector<std::vector<float> > resultKeypoints =
     applyVectorField(targetKeypoints, vectorFieldX, vectorFieldY,
                      vectorFieldZ, dimensions);
 
@@ -678,11 +678,11 @@ void runTPSRadialDiff(tps::CudaMemory cm, tps::Image regImage,
                                 targetImage, targetKeypoints);
   float diffRefRes = radialDiff(referenceImage, referenceKeypoints,
                                 regImage, resultKeypoints);
+
   double time = timer.toc();
   std::cout << "Calculate error execution time(" << mod << "): " << time << "s" << std::endl;
   std::cout << "Radial diff Ref Tar (" << mod << ") = " << diffRefTar << std::endl;
   std::cout << "Radial diff Ref Reg (" << mod << ") = " << diffRefRes << std::endl;
-
-
+  */
 }
 
